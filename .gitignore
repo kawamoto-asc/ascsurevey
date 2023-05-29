@@ -1,0 +1,7 @@
+*.zip
+*.bak
+
+.git
+db.sqlite3
+
+ascsurevey/__pycache__
