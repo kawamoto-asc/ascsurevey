@@ -107,6 +107,13 @@ USE_I18N = True
 
 USE_TZ = True
 
+# セッション設定
+# ブラウザ閉じたら破棄
+# セッションタイムアウトはデフォルトの2週間 コメントはテスト用の５分(秒表記)
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+#SESSION_COOKIE_AGE = 300
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
