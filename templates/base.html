@@ -6,7 +6,6 @@
     <title>汎用アンケートシステム</title>
     {% bootstrap_css %}
     {% bootstrap_javascript %}
-    <!--<link rel="stylesheet" href="{% static 'sureveys/css/style.css' %}">-->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     {% block extraheader %}{% endblock %}
 </head>
@@ -14,6 +13,9 @@
     <nav class="navbar navbar-expand flex-md-row navbar-dark bg-dark">
         <div class="container justify-content-between">
             <a href="/" class="navbar-brand">Django スニペット</a>
+            <ul class="navbar-nav mr-md-2">
+                <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">ログアウト</a></li>
+            </ul>
         </div>
     </nav>
     <main>
