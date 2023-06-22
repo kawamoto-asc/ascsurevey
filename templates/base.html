@@ -3,21 +3,35 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>汎用アンケートシステム</title>
+    <title>ASC 社内汎用アンケートシステム</title>
     {% bootstrap_css %}
     {% bootstrap_javascript %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     {% block extraheader %}{% endblock %}
 </head>
 <body>
-    <nav class="navbar navbar-expand flex-md-row navbar-dark bg-dark">
+<!--
+    <nav class="navbar navbar-expand flex-md-row navbar-dark bg-success">
         <div class="container justify-content-between">
             <a href="/" class="navbar-brand">Django スニペット</a>
             <ul class="navbar-nav mr-md-2">
                 <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">ログアウト</a></li>
             </ul>
         </div>
-    </nav>
+    </nav>-->
+    <header class="bg-primary bg-opacity-25">
+        <div class="container">
+            <div class="row">
+                <div class="col-6 pt-1"><p class="fs-4">ASC 社内汎用アンケートシステム</p></div>
+                <div class="col-5 my-auto text-end">{{ request.user.last_name }}</div>
+                {% if request.user.is_authenticated %}
+                    <div class="col-1 my-auto text-center"><a class="" href="{% url 'logout' %}">ログアウト</a></div>
+                {% else %}
+                    <div class="col-1"></div>
+                {% endif %}
+            </div>
+        </div>
+    </header>
     <main>
         <div class="container">
             {% block main %}{% endblock %}
