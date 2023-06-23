@@ -1,9 +1,28 @@
 {% extends "base.html" %}
 
 {% block main %}
-    <div class="welcome">
-        <h1 class="title">ようこそDjangoスニペットへ！</h1>
-        <p class="subtitle">あなたの知見を共有しましょう</p>
-        <a class="btn btn-primary" href="#">スニペットを作成する</a>
+    <div class="card mx-auto mt-5" style="max-width: 50rem;">
+        <div class="card-header pb-0">
+            <p class="display-6">Information</p>
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <tr>
+                    <td class="text-danger text-end">NEW</td>
+                    <td>2023/06/22</td>
+                    <td>Home画面をデザインしてみました</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>2023/06/10</td>
+                    <td>管理画面実装</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>2023/05/25</td>
+                    <td>プロジェクト立ち上げ</td>
+                </tr>
+            </table>
+        </div>
     </div>
 {% endblock %}
