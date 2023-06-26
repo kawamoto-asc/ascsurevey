@@ -1,13 +1,30 @@
-{% extends "base.html" %}
+{% load static %}
 {% load django_bootstrap5 %}
 
-{% block main %}
-<h2>ログイン</h2>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ASC 社内汎用アンケートシステム</title>
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
 
-<form method="post">
-    {% csrf_token %}
-    <input type="hidden" name="next" value="{{ next }}" />
-    {% bootstrap_form form %}
-    {% bootstrap_button button_type="submit" content="ログイン" %}
-</form>
-{% endblock %}
+<body>
+    <div class="bg-primary bg-opacity-25 ps-4">
+        <p class="fs-2">ASC 社内汎用アンケートシステム</p>
+    </div>
+    <main>
+        <div class="ps-5 pe-5">
+            <h2>ログイン</h2>
+
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next }}" />
+                {% bootstrap_form form %}
+                {% bootstrap_button button_type="submit" content="ログイン" %}
+            </form>
+        </div>
+    </main>
+</body>
+</html>

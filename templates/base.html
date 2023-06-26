@@ -8,42 +8,44 @@
     {% bootstrap_css %}
     {% bootstrap_javascript %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="{% static 'js/common.js' %}"></script>
     {% block extraheader %}{% endblock %}
 </head>
 <body class="h-100">
     <header class="w-100">
         <div class="fs-5 ps-3"><strong>ASC 社内汎用アンケートシステム</strong></div>
     </header>
-    <div class="d-flex flex-row h-100">
-        {% if request.user.is_authenticated %}
-            <nav class="bg-primary bg-opacity-75">
-                <ul class="nav flex-column m-0 p-3">
-                    <li class="nav-item"><a href="#" class="nav-link">ＨＯＭＥ</a></li>
-                    <li class="nav-item"><a href="#" class="nav-link">メニュ－１</a></li>
-                    <li class="nav-item"><a href="#" class="nav-link">メニュ－２</a></li>
-                </ul>
-            </nav>
-        {% endif %}
+    <div class="d-flex flex-row" style="height: calc(100% - 30px)">
+        <nav class="bg-primary bg-opacity-75" id="sideMenu">
+            <ul class="nav flex-column m-0 p-3">
+                <li class="nav-item"><a href="#" class="nav-link">ＨＯＭＥ</a></li>
+                <li class="nav-item"><a href="#" class="nav-link">メニュ－１</a></li>
+                <li class="nav-item"><a href="#" class="nav-link">メニュ－２</a></li>
+            </ul>
+        </nav>
         <div class="w-100">
-            {% if request.user.is_authenticated %}
-                <div class="border shadow-sm d-flex flex-row bg-primary bg-opacity-10 justify-content-between">
-                    <div class="d-flex flex-row align-items-center">
-                        <div class="navbar-brand toggle-menu">
-                            <button class="btn" id="toggle"><i class="fas fa-bars fa-lg">{% bs_icon 'justify' size='1.5em' %}</i></button>
-                        </div>
-                        <div class="fs-5">Dashboard</div>
+            <div class="border shadow-sm d-flex flex-row bg-primary bg-opacity-10 justify-content-between">
+                <div class="d-flex flex-row align-items-center">
+                    <div class="navbar-brand toggle-menu">
+                        <button class="btn" id="toggle">{% bs_icon 'justify' size='1.5em' %}</button>
                     </div>
-                    <div class="my-auto pe-3">
-                        <a class="" href="{% url 'logout' %}">ログアウト</a>
-                    </div>
+                    <div class="fs-5">Dashboard</div>
                 </div>
-            {% endif %}
-            <main style="border:solid 1px">
-                <div class="container d-flex flex-row">
+                <div class="my-auto pe-3">
+                    <a class="" href="{% url 'logout' %}">ログアウト</a>
+                </div>
+            </div>
+            <main>
+                <div class="container">
                     {% block main %}{% endblock %}
                 </div>
             </main>
         </div>
     </div>
 </body>
+<script type="text/javascript">
+    window.onload = () => {
+        menuControl();
+    }
+</script>
 </html>
