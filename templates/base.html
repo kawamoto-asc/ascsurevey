@@ -12,8 +12,9 @@
     {% block extraheader %}{% endblock %}
 </head>
 <body class="h-100">
-    <header class="w-100">
+    <header class="w-100 d-flex flex-row justify-content-between">
         <div class="fs-5 ps-3"><strong>ASC 社内汎用アンケートシステム</strong></div>
+        <div class="text-dark pe-3 pt-1">{{ request.user.last_name }}</div>
     </header>
     <div class="d-flex flex-row" style="height: calc(100% - 30px)">
         <nav class="bg-primary bg-opacity-75" id="sideMenu">
