@@ -160,3 +160,6 @@ cython_debug/
 #.idea/
 .gitignore
 ascsurevey/dbsettings.py
+
+# マイグレーションフォルダも管理外に
+migrations/
