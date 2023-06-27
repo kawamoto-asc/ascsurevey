@@ -5,9 +5,9 @@ from django.db import models
 # Information
 class Information(models.Model):
     info = models.CharField('情報', max_length=256)
-    created_by = models.CharField('登録者', max_length=128)
+    created_by = models.CharField('作成者', max_length=128)
     update_by = models.CharField('更新者', max_length=128, blank=True, null=True)
-    created_at = models.DateTimeField("登録日", auto_now_add=True)
+    created_at = models.DateTimeField("作成日", auto_now_add=True)
     updated_at = models.DateTimeField("更新日", auto_now=True)
 
     def __str__(self):
