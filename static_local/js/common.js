@@ -11,7 +11,7 @@ function menuControl() {
     sidemenuToggle.addEventListener('click', () => {
         // 表示状態を判定
         if(sidemenuStatus){
-            page.style.cssText = 'margin-left: -230px';
+            page.style.cssText = 'margin-left: -270px';
             sidemenuStatus = false;
         }
         else {
