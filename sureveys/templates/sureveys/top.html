@@ -6,23 +6,20 @@
             <p class="display-6">Information</p>
         </div>
         <div class="card-body">
-            <table class="table">
-                <tr>
-                    <td class="text-danger text-end">NEW</td>
-                    <td>2023/06/22</td>
-                    <td>Home画面をデザインしてみました</td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td>2023/06/10</td>
-                    <td>管理画面実装</td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td>2023/05/25</td>
-                    <td>プロジェクト立ち上げ</td>
-                </tr>
-            </table>
+            {% if informations %}
+                <table class="table">
+                    {% for idat in informations %}
+                    <tr>
+                        <!--登録日が７日以内はNEW表示-->
+                        <td class="text-danger text-end" style="width:100px">
+                            {% if idat.created_at >= dsp_new_day %}NEW{% endif %}
+                        </td>
+                        <td style="width:100px">{{ idat.created_at|date:"Y/m/d" }}</td>
+                        <td>{{ idat.info }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            {% endif %}
         </div>
     </div>
 {% endblock %}

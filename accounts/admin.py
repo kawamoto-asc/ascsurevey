@@ -34,5 +34,5 @@ class InformationAdmin(admin.ModelAdmin):
         # 保存
         super().save_model(request, obj, form, change)
 
-# Register your models here.
+# Register models
 admin.site.register(Information, InformationAdmin)
