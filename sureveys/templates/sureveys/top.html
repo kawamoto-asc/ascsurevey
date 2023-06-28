@@ -8,14 +8,14 @@
         <div class="card-body">
             {% if informations %}
                 <table class="table">
-                    {% for idat in informations %}
+                    {% for info_dat in informations %}
                     <tr>
                         <!--登録日が７日以内はNEW表示-->
                         <td class="text-danger text-end" style="width:100px">
-                            {% if idat.created_at >= dsp_new_day %}NEW{% endif %}
+                            {% if info_dat.created_at >= dsp_new_day %}NEW{% endif %}
                         </td>
-                        <td style="width:100px">{{ idat.created_at|date:"Y/m/d" }}</td>
-                        <td>{{ idat.info }}</td>
+                        <td style="width:100px">{{ info_dat.created_at|date:"Y/m/d" }}</td>
+                        <td>{{ info_dat.info }}</td>
                     </tr>
                     {% endfor %}
                 </table>
