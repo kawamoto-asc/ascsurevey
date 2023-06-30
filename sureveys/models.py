@@ -24,7 +24,7 @@ class Menu(models.Model):
     kbn = models.IntegerField ('区分', choices=MENU_KBN_CHOICES)
     dsp_no = models.IntegerField ('表示順')
 
-    created_by = models.CharField('作成者', max_length=128)
+    created_by = models.CharField('作成者', max_length=128, blank=True, null=True)
     update_by = models.CharField('更新者', max_length=128, blank=True, null=True)
     created_at = models.DateTimeField("作成日", auto_now_add=True)
     updated_at = models.DateTimeField("更新日", auto_now=True)
