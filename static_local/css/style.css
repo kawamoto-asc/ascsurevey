@@ -18,3 +18,9 @@ nav {
 .nav-link:hover {
     color: gainsboro;
 }
+
+/* メニューの区切り */
+.menu_hr {
+    border-top: solid 1px ghostwhite;
+    opacity: 0.3;
+}
