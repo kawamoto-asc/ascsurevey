@@ -51,3 +51,47 @@ class Ujf(models.Model):
 
     def __str__(self) -> str:
         return super().__str__()
+
+# 役職マスタ
+class Post(models.Model):
+    nendo = models.IntegerField('年度')
+    post_code = models.IntegerField('役職コード')
+    post_name = models.CharField('役職名')
+
+    created_by = models.CharField('作成者', max_length=128, blank=True, null=True)
+    update_by = models.CharField('更新者', max_length=128, blank=True, null=True)
+    created_at = models.DateTimeField("作成日", auto_now_add=True)
+    updated_at = models.DateTimeField("更新日", auto_now=True)
+
+    def __str__(self) -> str:
+        return super().__str__()
+
+# 部署マスタ
+class Busyo(models.Model):
+    nendo = models.IntegerField('年度')
+    bu_code = models.IntegerField('部署コード')
+    bu_name = models.CharField('部名称')
+
+    created_by = models.CharField('作成者', max_length=128, blank=True, null=True)
+    update_by = models.CharField('更新者', max_length=128, blank=True, null=True)
+    created_at = models.DateTimeField("作成日", auto_now_add=True)
+    updated_at = models.DateTimeField("更新日", auto_now=True)
+
+    def __str__(self) -> str:
+        return super().__str__()
+
+
+# 勤務地マスタ
+class Location(models.Model):
+    nendo = models.IntegerField('年度')
+    location_code = models.IntegerField('勤務地コード')
+    location_name = models.CharField('勤務地名')
+
+    created_by = models.CharField('作成者', max_length=128, blank=True, null=True)
+    update_by = models.CharField('更新者', max_length=128, blank=True, null=True)
+    created_at = models.DateTimeField("作成日", auto_now_add=True)
+    updated_at = models.DateTimeField("更新日", auto_now=True)
+
+    def __str__(self) -> str:
+        return super().__str__()
+
