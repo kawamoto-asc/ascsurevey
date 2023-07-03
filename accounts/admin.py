@@ -67,7 +67,7 @@ class MenuAdmin(ImportExportMixin, admin.ModelAdmin):
     formats = [base_formats.XLSX]   # 出力形式はxlsxのみ
 
     # 入力設定
-    fields = ('title', 'url', 'kbn', 'dsp_no')
+    fields = ('title', 'url', 'kbn', 'req_staff', 'dsp_no')
 
     # 保存の処理を上書き
     def save_model(self, request, obj, form, change):

@@ -20,18 +20,36 @@
         <nav class="bg-primary bg-opacity-75" id="sideMenu">
             <ul class="nav flex-column m-0 p-3">
                 <li class="nav-item"><a href="/" class="nav-link">ＨＯＭＥ</a></li>
-                {% for imenu_dat in imenu %}
-                    <li class="nav-item"><a href="{{ imenu_dat.url }}" class="nav-link">{{ imenu_dat.title }}</a></li>
-                {% endfor %}
-                <!--以降のメニューはスタッフ権限の人のみ-->
+                <li class="nav-item text-light menu_hr"></li>
+                <!--スタッフ権限があるユーザの場合-->
                 {% if request.user.is_staff %}
-                    <li class="nav-item text-light"><hr></li>
+                    {% for imenu_dat in imenu %}
+                        <li class="nav-item"><a href="{{ imenu_dat.url }}" class="nav-link">{{ imenu_dat.title }}</a></li>
+                    {% endfor %}
+                    {% if skttl_count > 0 %}
+                        <li class="nav-item text-light menu_hr"></li>
+                    {% endif %}
                     {% for tmenu_dat in tmenu %}
                         <li class="nav-item"><a href="{{ tmenu_dat.url }}" class="nav-link">{{ tmenu_dat.title }}</a></li>
                     {% endfor %}
-                    <li class="nav-item text-white"><hr></li>
+                    <li class="nav-item text-white menu_hr"></li>
                     {% for amenu_dat in amenu %}
                         <li class="nav-item"><a href="{{ amenu_dat.url }}" class="nav-link">{{ amenu_dat.title }}</a></li>
+                    {% endfor %}
+                <!--一般権限のユーザの場合-->
+                {% else %}
+                    {% for imenu_dat in imenu %}
+                        {% if imenu_dat.req_staff == False %}
+                            <li class="nav-item"><a href="{{ imenu_dat.url }}" class="nav-link">{{ imenu_dat.title }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if skgene_count > 0 %}
+                        <li class="nav-item text-light menu_hr"></li>
+                    {% endif %}
+                    {% for tmenu_dat in tmenu %}
+                        {% if tmenu_dat.req_staff == False %}
+                            <li class="nav-item"><a href="{{ tmenu_dat.url }}" class="nav-link">{{ tmenu_dat.title }}</a></li>
+                        {% endif %}
                     {% endfor %}
                 {% endif %}
             </ul>
