@@ -23,6 +23,26 @@ class Menu(models.Model):
     # 区分 1:アンケート入力画面 2:アンケート集計画面 8:アンケートメンテナンス画面
     kbn = models.IntegerField ('区分', choices=MENU_KBN_CHOICES)
     dsp_no = models.IntegerField ('表示順')
+    req_staff = models.BooleanField('スタッフ権限要否')
+
+    created_by = models.CharField('作成者', max_length=128, blank=True, null=True)
+    update_by = models.CharField('更新者', max_length=128, blank=True, null=True)
+    created_at = models.DateTimeField("作成日", auto_now_add=True)
+    updated_at = models.DateTimeField("更新日", auto_now=True)
+
+    def __str__(self) -> str:
+        return super().__str__()
+    
+# 運用条件
+class Ujf(models.Model):
+    key1 = models.IntegerField()
+    key2 = models.CharField(max_length=128)
+    naiyou1 = models.CharField('内容1', max_length=256, blank=True, null=True)
+    naiyou2 = models.CharField('内容2', max_length=256, blank=True, null=True)
+    naiyou3 = models.CharField('内容3', max_length=256, blank=True, null=True)
+    naiyou4 = models.IntegerField('内容4', blank=True, null=True)
+    naiyou5 = models.DecimalField('内容5', max_digits=12, decimal_places=2, blank=True, null=True)
+    bikou = models.TextField('備考', blank=True, null=True)
 
     created_by = models.CharField('作成者', max_length=128, blank=True, null=True)
     update_by = models.CharField('更新者', max_length=128, blank=True, null=True)
