@@ -69,6 +69,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'sureveys.context_processors.global_menu_data',
+                'sureveys.context_processors.global_ujf',
             ],
         },
     },
