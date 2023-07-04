@@ -10,8 +10,8 @@ class Information(models.Model):
 
     created_by = models.CharField('作成者', max_length=128)
     update_by = models.CharField('更新者', max_length=128, blank=True, null=True)
-    created_at = models.DateTimeField("作成日", auto_now_add=True)
-    updated_at = models.DateTimeField("更新日", auto_now=True)
+    created_at = models.DateTimeField('作成日', auto_now_add=True)
+    updated_at = models.DateTimeField('更新日', auto_now=True)
 
     def __str__(self):
         return self.info
@@ -27,8 +27,8 @@ class Menu(models.Model):
 
     created_by = models.CharField('作成者', max_length=128, blank=True, null=True)
     update_by = models.CharField('更新者', max_length=128, blank=True, null=True)
-    created_at = models.DateTimeField("作成日", auto_now_add=True)
-    updated_at = models.DateTimeField("更新日", auto_now=True)
+    created_at = models.DateTimeField('作成日', auto_now_add=True)
+    updated_at = models.DateTimeField('更新日', auto_now=True)
 
     def __str__(self) -> str:
         return super().__str__()
@@ -46,8 +46,17 @@ class Ujf(models.Model):
 
     created_by = models.CharField('作成者', max_length=128, blank=True, null=True)
     update_by = models.CharField('更新者', max_length=128, blank=True, null=True)
-    created_at = models.DateTimeField("作成日", auto_now_add=True)
-    updated_at = models.DateTimeField("更新日", auto_now=True)
+    created_at = models.DateTimeField('作成日', auto_now_add=True)
+    updated_at = models.DateTimeField('更新日', auto_now=True)
+
+    # ユニークキー設定
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+            fields = ['key1', 'key2'],
+            name = 'ujf_unique'
+            ),
+        ]
 
     def __str__(self) -> str:
         return super().__str__()
@@ -60,11 +69,20 @@ class Post(models.Model):
 
     created_by = models.CharField('作成者', max_length=128, blank=True, null=True)
     update_by = models.CharField('更新者', max_length=128, blank=True, null=True)
-    created_at = models.DateTimeField("作成日", auto_now_add=True)
-    updated_at = models.DateTimeField("更新日", auto_now=True)
+    created_at = models.DateTimeField('作成日', auto_now_add=True)
+    updated_at = models.DateTimeField('更新日', auto_now=True)
+
+    # ユニークキー設定
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+            fields = ['nendo', 'post_code'],
+            name = 'post_unique'
+            ),
+        ]
 
     def __str__(self) -> str:
-        return super().__str__()
+        return str(self.nendo) + '_' + self.post_name
 
 # 部署マスタ
 class Busyo(models.Model):
@@ -74,12 +92,20 @@ class Busyo(models.Model):
 
     created_by = models.CharField('作成者', max_length=128, blank=True, null=True)
     update_by = models.CharField('更新者', max_length=128, blank=True, null=True)
-    created_at = models.DateTimeField("作成日", auto_now_add=True)
-    updated_at = models.DateTimeField("更新日", auto_now=True)
+    created_at = models.DateTimeField('作成日', auto_now_add=True)
+    updated_at = models.DateTimeField('更新日', auto_now=True)
+
+    # ユニークキー設定
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+            fields = ['nendo', 'bu_code'],
+            name = 'busyo_unique'
+            ),
+        ]
 
     def __str__(self) -> str:
-        return super().__str__()
-
+        return str(self.nendo) + '_' + self.bu_name
 
 # 勤務地マスタ
 class Location(models.Model):
@@ -89,9 +115,45 @@ class Location(models.Model):
 
     created_by = models.CharField('作成者', max_length=128, blank=True, null=True)
     update_by = models.CharField('更新者', max_length=128, blank=True, null=True)
-    created_at = models.DateTimeField("作成日", auto_now_add=True)
-    updated_at = models.DateTimeField("更新日", auto_now=True)
+    created_at = models.DateTimeField('作成日', auto_now_add=True)
+    updated_at = models.DateTimeField('更新日', auto_now=True)
+
+    # ユニークキー設定
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+            fields = ['nendo', 'location_code'],
+            name = 'location_unique'
+            ),
+        ]
 
     def __str__(self) -> str:
-        return super().__str__()
+        return str(self.nendo) + '_' + self.location_name
 
+# ユーザマスタ
+class CustomUser(models.Model):
+    nendo = models.IntegerField('年度')
+    user_id = models.CharField('ユーザーID', max_length=128)
+    first_name = models.CharField('氏', max_length=128)
+    last_name =  models.CharField('名', max_length=128)
+    email = models.CharField('メールアドレス', max_length=128, blank=True, null=True)
+    post_id = models.ForeignKey(Post, on_delete=models.DO_NOTHING)
+    busyo_id = models.ForeignKey(Busyo, on_delete=models.DO_NOTHING)
+    location_id = models.ForeignKey(Location, on_delete=models.DO_NOTHING)
+
+    created_by = models.CharField('作成者', max_length=128, blank=True, null=True)
+    update_by = models.CharField('更新者', max_length=128, blank=True, null=True)
+    created_at = models.DateTimeField('作成日', auto_now_add=True)
+    updated_at = models.DateTimeField('更新日', auto_now=True)
+
+    # ユニークキー設定
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+            fields = ['nendo', 'user_id'],
+            name = 'cmuser_unique'
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return str(self.nendo) + '_' + self.user_id

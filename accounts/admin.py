@@ -4,7 +4,7 @@ from import_export.admin import ImportExportMixin
 from import_export.fields import Field
 from import_export.formats import base_formats
 from pytz import timezone
-from sureveys.models import Information, Menu, Ujf, Post, Busyo, Location
+from sureveys.models import Information, Menu, Ujf, Post, Busyo, Location, CustomUser
 
 # 管理画面でのメンテクラス
 # Informationメンテナンス画面
@@ -135,11 +135,11 @@ class PostResource(resources.ModelResource):
         skip_unchanged = True           # 変更のあったものだけ取込み
         use_bulk = True
 
-# 役職 メンテナンス画面
+# 役職マスタ メンテナンス画面
 class PostAdmin(ImportExportMixin, admin.ModelAdmin):
     # 一覧設定
     list_display = ('nendo', 'post_code', 'post_name', 'created_by', 'created_format', 'update_by', 'updated_format')
-    ordering = ['nendo', 'post_code']
+    ordering = ['-nendo', 'post_code']
 
     def created_format(self, obj):
         return obj.created_at.astimezone(timezone('Asia/Tokyo')).strftime('%Y/%m/%d %H:%M:%S')
@@ -179,11 +179,11 @@ class BusyoResource(resources.ModelResource):
         skip_unchanged = True           # 変更のあったものだけ取込み
         use_bulk = True
 
-# 部署 メンテナンス画面
+# 部署マスタ メンテナンス画面
 class BusyoAdmin(ImportExportMixin, admin.ModelAdmin):
     # 一覧設定
     list_display = ('nendo', 'bu_code', 'bu_name', 'created_by', 'created_format', 'update_by', 'updated_format')
-    ordering = ['nendo', 'bu_code']
+    ordering = ['-nendo', 'bu_code']
 
     def created_format(self, obj):
         return obj.created_at.astimezone(timezone('Asia/Tokyo')).strftime('%Y/%m/%d %H:%M:%S')
@@ -223,11 +223,11 @@ class LocationResource(resources.ModelResource):
         skip_unchanged = True           # 変更のあったものだけ取込み
         use_bulk = True
 
-# 勤務地 メンテナンス画面
+# 勤務地マスタ メンテナンス画面
 class LocationAdmin(ImportExportMixin, admin.ModelAdmin):
     # 一覧設定
     list_display = ('nendo', 'location_code', 'location_name', 'created_by', 'created_format', 'update_by', 'updated_format')
-    ordering = ['nendo', 'location_code']
+    ordering = ['-nendo', 'location_code']
 
     def created_format(self, obj):
         return obj.created_at.astimezone(timezone('Asia/Tokyo')).strftime('%Y/%m/%d %H:%M:%S')
@@ -258,6 +258,27 @@ class LocationAdmin(ImportExportMixin, admin.ModelAdmin):
         # 保存
         super().save_model(request, obj, form, change)
 
+# ユーザマスタ メンテナンス画面
+class CustomUserAdmin(ImportExportMixin, admin.ModelAdmin):
+    # 一覧設定
+    ordering = ['-nendo', 'user_id']
+
+    # 入力設定
+    exclude = ('created_by', 'update_by')
+
+    # 保存の処理を上書き
+    def save_model(self, request, obj, form, change):
+        # 作成者が空なら新規
+        if not obj.created_by:
+            # 作成者へログインIDをセット
+            obj.created_by = request.user.username
+        else:
+            # 更新者へログインIDをセット
+            obj.update_by = request.user.username
+
+        # 保存
+        super().save_model(request, obj, form, change)
+
 # Register models
 admin.site.register(Information, InformationAdmin)
 admin.site.register(Menu, MenuAdmin)
@@ -265,3 +286,4 @@ admin.site.register(Ujf, UjfAdmin)
 admin.site.register(Post, PostAdmin)
 admin.site.register(Busyo, BusyoAdmin)
 admin.site.register(Location, LocationAdmin)
+admin.site.register(CustomUser, CustomUserAdmin)

@@ -1,4 +1,4 @@
-from sureveys.models import Menu
+from sureveys.models import Menu, Ujf
 
 # メニュー情報
 def global_menu_data(request):
@@ -18,4 +18,13 @@ def global_menu_data(request):
         'amenu': admin_menu,
         'skttl_count': totalling_ttl_count,
         'skgene_count': totalling_gene_count,
+    }
+
+# 運用条件情報
+def global_ujf(request):
+    # 今年度取得
+    nobj = Ujf.objects.get(key1=1, key2='1')
+
+    return {
+        'nendo': nobj.naiyou4,
     }
