@@ -52,6 +52,10 @@
                         {% endif %}
                     {% endfor %}
                 {% endif %}
+                <!--スーパーユーザ権限がある場合-->
+                {% if request.user.is_superuser %}
+                    <li class="nav-item"><a href="/customusers/" class="nav-link">ユーザーマスタメンテナンス</a></li>
+                {% endif %}
             </ul>
         </nav>
         <div class="w-100">
