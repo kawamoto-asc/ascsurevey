@@ -26,5 +26,5 @@ def global_ujf(request):
     nobj = Ujf.objects.get(key1=1, key2='1')
 
     return {
-        'nendo': nobj.naiyou4,
+        'ujf_nendo': nobj.naiyou4,
     }
