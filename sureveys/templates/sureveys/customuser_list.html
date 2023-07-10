@@ -1,5 +1,18 @@
 {% extends "base.html" %}
 
 {% block main %}
-    ユーザーマスタメンテナンス画面だよ~
+    <div>
+        <h1 class="display-6">ユーザーマスタメンテナンス</h1>
+        <form method="POST">
+            {% csrf_token %}
+            <table>
+                <tr>
+                    {% for field in query_form %}
+                        <th>{{ field.label }}</th>
+                        <td>{{ field }}</td>
+                    {% endfor %}
+                </tr>
+            </table>
+        </form>
+    </div>
 {% endblock %}
