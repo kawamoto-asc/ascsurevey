@@ -43,20 +43,56 @@ class CUsersListView(LoginRequiredMixin, ListView):
         first_nendo = nendo_list[0][0]    # 年度リストの先頭値
 
         # 部署リスト
-        blist = Busyo.objects.filter(nendo=first_nendo).values_list('bu_code', 'bu_name').order_by('bu_code')
+        blist = [('', '')] + list(Busyo.objects.filter(nendo=first_nendo).values_list('bu_code', 'bu_name').order_by('bu_code'))
         query_form.fields['busyo'].choices = blist
 
         # 勤務地リスト
-        llist = Location.objects.filter(nendo=first_nendo).values_list('location_code', 'location_name').order_by('location_code')
+        llist = [('', '')] + list(Location.objects.filter(nendo=first_nendo).values_list('location_code', 'location_name').order_by('location_code'))
         query_form.fields['location'].choices = llist
 
         # 役職リスト
-        plist = Post.objects.filter(nendo=first_nendo).values_list('post_code', 'post_name').order_by('post_code')
+        plist = llist = [('', '')] + list(Post.objects.filter(nendo=first_nendo).values_list('post_code', 'post_name').order_by('post_code'))
         query_form.fields['post'].choices = plist
 
         context['query_form'] = query_form
 
         return context
+
+# 部署リスト取得処理 FetchAPI用
+# パラメータ：nendo 年度
+def getBusyoList(request):
+        pnendo = request.POST.get('nendo')
+        plistid = request.POST.get('list_id')
+
+        # リスト作成
+        busyo_list = llist = [('', '')] + list(Busyo.objects.filter(nendo=pnendo).values_list('bu_code', 'bu_name').order_by('bu_code'))
+        bulst = []
+        for pdat in busyo_list:
+             bulst.append(list(pdat))
+
+        data = {
+             'list_id': plistid,
+             'rlist': bulst,
+        }
+        return JsonResponse(data)
+
+# 勤務地リスト取得処理 FetchAPI用
+# パラメータ：nendo 年度
+def getLocationList(request):
+        pnendo = request.POST.get('nendo')
+        plistid = request.POST.get('list_id')
+
+        # リスト作成
+        location_list = llist = [('', '')] + list(Location.objects.filter(nendo=pnendo).values_list('location_code', 'location_name').order_by('location_code'))
+        loclst = []
+        for pdat in location_list:
+             loclst.append(list(pdat))
+
+        data = {
+             'list_id': plistid,
+             'rlist': loclst,
+        }
+        return JsonResponse(data)
 
 # 役職リスト取得処理 FetchAPI用
 # パラメータ：nendo 年度
@@ -64,8 +100,8 @@ def getPostList(request):
         pnendo = request.POST.get('nendo')
         plistid = request.POST.get('list_id')
 
-        # 役職リスト作成
-        post_list = Post.objects.filter(nendo=pnendo).values_list('post_code', 'post_name').order_by('post_code')
+        # リスト作成
+        post_list = llist = [('', '')] + list(Post.objects.filter(nendo=pnendo).values_list('post_code', 'post_name').order_by('post_code'))
         pstlst = []
         for pdat in post_list:
              pstlst.append(list(pdat))
