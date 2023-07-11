@@ -1,6 +1,7 @@
+from datetime import datetime, timedelta
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from datetime import datetime, timedelta
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
 from django.views.generic import ListView
@@ -57,8 +58,20 @@ class CUsersListView(LoginRequiredMixin, ListView):
 
         return context
 
-def getCustomerPostList(request):
+# 役職リスト取得処理 FetchAPI用
+# パラメータ：nendo 年度
+def getPostList(request):
         pnendo = request.POST.get('nendo')
+        plistid = request.POST.get('list_id')
 
         # 役職リスト作成
         post_list = Post.objects.filter(nendo=pnendo).values_list('post_code', 'post_name').order_by('post_code')
+        pstlst = []
+        for pdat in post_list:
+             pstlst.append(list(pdat))
+
+        data = {
+             'list_id': plistid,
+             'rlist': pstlst,
+        }
+        return JsonResponse(data)

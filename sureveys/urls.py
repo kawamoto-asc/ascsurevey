@@ -1,10 +1,10 @@
 from django.urls import path, include
 from . import views
 
-from sureveys.views import top, getCustomerPostList
+from sureveys.views import *
 
 urlpatterns = [
     path('', top, name='top'),
     path('customusers/', views.CUsersListView.as_view(), name='list-cusers'),
-    path('get-customerpostlist', getCustomerPostList, name='get-customerpostlist'),
+    path('get-postlist', getPostList, name='get-postlist'),
 ]
