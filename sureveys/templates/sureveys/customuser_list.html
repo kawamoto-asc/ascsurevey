@@ -8,11 +8,24 @@
             <table>
                 <tr>
                     {% for field in query_form %}
-                        <th>{{ field.label }}</th>
-                        <td>{{ field }}</td>
+                        <th class="pe-1">{{ field.label }}</th>
+                        <td class="pe-3">{{ field }}</td>
                     {% endfor %}
                 </tr>
             </table>
         </form>
     </div>
+
+    <script>
+        // 年度選択リストオブジェクト取得
+        let p = document.querySelector('#id_nendo');
+
+        // 検索リスト作成
+        function changeNendo() {
+            alert(p.selectedOptions[0].value);
+        }
+
+        // 年度選択変更時リスト再作成
+        p.onchange = changeNendo;
+    </script>
 {% endblock %}
