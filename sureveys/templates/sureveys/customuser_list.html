@@ -21,6 +21,10 @@
 
         p.onchange = function() {
             let pnendo = p.selectedOptions[0].value;
+            // 部署リスト更新
+            renewSelectList(pnendo, '/get-busyolist', '#id_busyo');
+            // 勤務地リスト更新
+            renewSelectList(pnendo, '/get-locationlist', '#id_location');
             // 役職リスト更新
             renewSelectList(pnendo, '/get-postlist', '#id_post');
         }
