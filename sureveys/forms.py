@@ -1,6 +1,7 @@
 from django import forms
 from sureveys.models import *
 
+# ユーザーマスタメンテナンス 検索フォーム
 class CustomUserQueryForm(forms.Form):
     nendo = forms.ChoiceField(label='年度', required=True, disabled=False,)
     busyo = forms.ChoiceField(label='部署', required=False,)

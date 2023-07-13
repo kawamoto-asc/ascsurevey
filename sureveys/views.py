@@ -80,7 +80,13 @@ class CUsersListView(LoginRequiredMixin, ListView):
     template_name = 'sureveys/customuser_list.html'
     model = CustomUser
 
+    # 検索条件をクリアするためのフラグ
+    ini_flg = True
+
     def post(self, request, *args, **kwargs):
+        # 一度検索したので、初期化フラグをOFF
+        self.ini_flg = False
+
         # フォームの内容をセッション情報へ
         form_value = [
             self.request.POST.get('nendo', None),
@@ -117,17 +123,23 @@ class CUsersListView(LoginRequiredMixin, ListView):
         # 役職リスト作成
         plist = [('', '')] + list(Post.objects.filter(nendo=first_nendo).values_list('post_code', 'post_name').order_by('post_code'))
 
-        # sessionに値がある場合、その値をセットする。（ページングしてもform値が変わらないように）
         nendo = first_nendo
         busyo = ''
         location = ''
         post = ''
+        # sessionに値がある場合
         if 'form_value' in self.request.session:
-            form_value = self.request.session['form_value']
-            nendo = form_value[0]
-            busyo = form_value[1]
-            location = form_value[2]
-            post = form_value[3]
+            # 初期化フラグがTrueなら
+            if self.ini_flg:
+                # セッションをクリアする
+                del self.request.session['form_value']
+            else:
+                # 初期化フラグがFalseなら、セッションの値をセットする
+                form_value = self.request.session['form_value']
+                nendo = form_value[0]
+                busyo = form_value[1]
+                location = form_value[2]
+                post = form_value[3]
 
         default_data = {'nendo': nendo,
                         'busyo': busyo,
@@ -144,13 +156,14 @@ class CUsersListView(LoginRequiredMixin, ListView):
         query_form.fields['post'].choices = plist
 
         context['query_form'] = query_form
+        context['ini_flg'] = self.ini_flg
 
         return context
 
     def get_queryset(self):
-         
-        # sessionに値がある場合、その値でクエリ発行する。
-        if 'form_value' in self.request.session:
+
+        # sessionに値があって、検索ボタン押下なら、セッション値でクエリ発行する。
+        if not self.ini_flg and 'form_value' in self.request.session:
             form_value = self.request.session['form_value']
             nendo = form_value[0]
             busyo = form_value[1]
