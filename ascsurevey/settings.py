@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts.apps.AccountsConfig',
+    'customuser.apps.CustomuserConfig',
     'sureveys.apps.SureveysConfig',
     'django_bootstrap5',
     'django_bootstrap_icons',
