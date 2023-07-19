@@ -38,12 +38,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'accounts.apps.AccountsConfig',
-    'customuser.apps.CustomuserConfig',
-    'sureveys.apps.SureveysConfig',
     'django_bootstrap5',
     'django_bootstrap_icons',
     'import_export',
+    'accounts.apps.AccountsConfig',
+    'sureveys.apps.SureveysConfig',
+    'customuser.apps.CustomuserConfig',
 ]
 
 MIDDLEWARE = [
