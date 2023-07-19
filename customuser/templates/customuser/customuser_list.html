@@ -25,10 +25,10 @@
                     <p>検索結果が存在しません。</p>
                 {% else %}
                     <div class="mb-1">
-                        <input class="btn btn-warning text-light" type="submit" value="新規作成">
+                        <a class="btn btn-warning text-light" href="{% url 'new_cusers' %}">新規作成</a>
                         <input class="ms-3 btn btn-success opacity-75" type="submit" value="Excel出力">
                         <input class="ms-1 btn btn-success opacity-75" type="submit" value="Excel入力">
-                        <input class="ms-3 btn btn-danger opacity-75" type="submit" value="削除">
+                        <!--<input class="ms-3 btn btn-danger opacity-75" type="submit" value="削除">-->
                     </div>
                     <table class="table table-hover table-bordered">
                         <thead class="table-light">
