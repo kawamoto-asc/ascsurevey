@@ -2,6 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.urls import reverse_lazy
 from django.views.generic import ListView, FormView
 from customuser.forms import CustomUserQueryForm, CustomUserForm
 from sureveys.models import Ujf, Busyo, Location, Post, CustomUser
@@ -182,4 +183,4 @@ class CUsersListView(LoginRequiredMixin, ListView):
 class CUsersCreateView(LoginRequiredMixin, FormView):
     template_name = 'customuser/customuser_edit.html'
     form_class = CustomUserForm
-    success_url = '/customusers/'
+    success_url = reverse_lazy('cusers-list')

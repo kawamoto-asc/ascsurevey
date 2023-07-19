@@ -1,3 +1,4 @@
+/* 検索条件のセレクトボックスの幅 */
 #id_busyo {
     width: 120px;
 }
@@ -8,4 +9,11 @@
 
 #id_post {
     width: 80px;
+}
+
+/* 入力フォームのレイアウトテーブル */
+#entry-form th {
+    text-align: right;
+    padding-right: 3px;
+    height: 40px;
 }
