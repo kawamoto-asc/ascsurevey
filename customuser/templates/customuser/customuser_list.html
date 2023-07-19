@@ -3,7 +3,11 @@
 
 {% block main %}
     <div>
-        <h1 class="display-6">ユーザーマスタメンテナンス</h1>
+        <nav aria-label="breadcrumb" role="navigation">
+            <ol class="breadcrumb pt-3">
+                <li class="fs-5 breadcrumb-item active" aria-current="page">ユーザーマスタメンテナンス</li>
+            </ol>
+        </nav>
         <form method="POST">
             {% csrf_token %}
             <table>
@@ -25,7 +29,7 @@
                     <p>検索結果が存在しません。</p>
                 {% else %}
                     <div class="mb-1">
-                        <a class="btn btn-warning text-light" href="{% url 'new_cusers' %}">新規作成</a>
+                        <a class="btn btn-warning text-light" href="{% url 'cusers-new' %}">新規作成</a>
                         <input class="ms-3 btn btn-success opacity-75" type="submit" value="Excel出力">
                         <input class="ms-1 btn btn-success opacity-75" type="submit" value="Excel入力">
                         <!--<input class="ms-3 btn btn-danger opacity-75" type="submit" value="削除">-->

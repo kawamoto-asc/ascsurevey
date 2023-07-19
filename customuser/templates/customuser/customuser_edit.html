@@ -1,3 +1,58 @@
+{% extends "base.html" %}
 
-
-Customuser_newです～
+{% block main %}
+    <div>
+        <nav aria-label="breadcrumb" style="width:100%;">
+            <ol class="breadcrumb pt-3 fs-5">
+                <li class="breadcrumb-item"><a href="{% url 'cusers-list' %}">ユーザーマスタメンテナンス</a></li>
+                <li class="breadcrumb-item active" aria-current="page">新規登録</li>
+            </ol>
+        </nav>
+        <form method="POST">
+            {% csrf_token %}
+            <table id="entry-form">
+                <tr>
+                    <td colspan="3" class="text-end">
+                        <input class="ms-3 btn btn-info text-light" type="submit" value="登録">
+                    </td>
+                    <td>
+                        <input class="ms-1 btn btn-warning text-light" type="submit" value="戻る">
+                    </td>
+                </tr>
+                <tr>
+                    <th>{{ form.nendo.label_tag }}</th>
+                    <td colspan="2">{{ form.nendo }}</td>
+                </tr>
+                <tr>
+                    <th>{{ form.busyo.label_tag }}</th>
+                    <td colspan="2">{{ form.busyo }}</td>
+                </tr>
+                <tr>
+                    <th>{{ form.location.label_tag }}</th>
+                    <td colspan="2">{{ form.location }}</td>
+                </tr>
+                <tr>
+                    <th>{{ form.post.label_tag }}</th>
+                    <td colspan="2">{{ form.post }}</td>
+                </tr>
+                <tr>
+                    <th>{{ form.user_id.label_tag }}</th>
+                    <td colspan="2">{{ form.user_id }}</td>
+                </tr>
+                <tr>
+                    <th>氏名:</th>
+                    <td>{{ form.last_name }}</td>
+                    <td>{{ form.first_name }}</td>
+                </tr>
+                <tr>
+                    <th>{{ form.email.label_tag }}</th>
+                    <td colspan="2">{{ form.email }}</td>
+                </tr>
+                <tr>
+                    <th>{{ form.is_staff.label_tag }}</th>
+                    <td class="ps-2">{{ form.is_staff }}</td>
+                </tr>
+            </table>
+        </form>
+    </div>
+{% endblock %}
