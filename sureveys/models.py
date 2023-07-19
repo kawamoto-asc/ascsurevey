@@ -140,6 +140,7 @@ class CustomUser(models.Model):
     post_id = models.ForeignKey(Post, on_delete=models.DO_NOTHING)
     busyo_id = models.ForeignKey(Busyo, on_delete=models.DO_NOTHING)
     location_id = models.ForeignKey(Location, on_delete=models.DO_NOTHING)
+    is_staff = models.BooleanField('管理者権限')
 
     created_by = models.CharField('作成者', max_length=128, blank=True, null=True)
     update_by = models.CharField('更新者', max_length=128, blank=True, null=True)

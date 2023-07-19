@@ -8,6 +8,16 @@ class CustomUserQueryForm(forms.Form):
     location = forms.ChoiceField(label='勤務地', required=False,)
     post = forms.ChoiceField(label='役職', required=False,)
 
-# ユーザマスタメンテ新規フォーム
-#class CustomUserForm(forms.Form):
-#    nendo 
+# ユーザマスタメンテ 新規登録フォーム
+class CustomUserForm(forms.Form):
+    nendo = forms.CharField(label='年度',
+        widget=forms.TextInput(attrs={'readonly': 'readonly',}),
+    )
+    busyo = forms.ChoiceField(label='部署', required=False,)
+    location = forms.ChoiceField(label='勤務地', required=False,)
+    post = forms.ChoiceField(label='役職', required=False,)
+    user_id = forms.CharField(label='ユーザーID', max_length=128)
+    first_name = forms.CharField(label='氏', max_length=128)
+    last_name =  forms.CharField(label='名', max_length=128)
+    email = forms.CharField(label='メールアドレス', max_length=128)
+    is_staff = forms.BooleanField(label='管理者権限')

@@ -2,8 +2,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render
-from django.views.generic import ListView
-from customuser.forms import CustomUserQueryForm
+from django.views.generic import ListView, FormView
+from customuser.forms import CustomUserQueryForm, CustomUserForm
 from sureveys.models import Ujf, Busyo, Location, Post, CustomUser
 
 # 部署リスト取得処理 FetchAPI用
@@ -60,7 +60,7 @@ def getPostList(request):
         }
         return JsonResponse(data)
 
-# ユーザーマスタメンテナンス
+# ユーザーマスタメンテナンス 一覧
 class CUsersListView(LoginRequiredMixin, ListView):
     template_name = 'customuser/customuser_list.html'
     model = CustomUser
@@ -97,18 +97,7 @@ class CUsersListView(LoginRequiredMixin, ListView):
         for i in range(len(nendo_list)):
             nendolst.append((nendo_list[i][0], nendo_list[i][0]))
 
-        first_nendo = nendo_list[0][0]    # 年度リストの先頭値
-
-        # 部署リスト作成
-        blist = [('', '')] + list(Busyo.objects.filter(nendo=first_nendo).values_list('bu_code', 'bu_name').order_by('bu_code'))
-
-        # 勤務地リスト作成
-        llist = [('', '')] + list(Location.objects.filter(nendo=first_nendo).values_list('location_code', 'location_name').order_by('location_code'))
-
-        # 役職リスト作成
-        plist = [('', '')] + list(Post.objects.filter(nendo=first_nendo).values_list('post_code', 'post_name').order_by('post_code'))
-
-        nendo = first_nendo
+        nendo = nendo_list[0][0]    # 年度リストの先頭値
         busyo = ''
         location = ''
         post = ''
@@ -131,6 +120,15 @@ class CUsersListView(LoginRequiredMixin, ListView):
                         'location': location,
                         'post': post,
                         }
+
+        # 部署リスト作成
+        blist = [('', '')] + list(Busyo.objects.filter(nendo=nendo).values_list('bu_code', 'bu_name').order_by('bu_code'))
+
+        # 勤務地リスト作成
+        llist = [('', '')] + list(Location.objects.filter(nendo=nendo).values_list('location_code', 'location_name').order_by('location_code'))
+
+        # 役職リスト作成
+        plist = [('', '')] + list(Post.objects.filter(nendo=nendo).values_list('post_code', 'post_name').order_by('post_code'))
 
         query_form = CustomUserQueryForm(initial=default_data)  # 検索フォーム
 
@@ -179,3 +177,9 @@ class CUsersListView(LoginRequiredMixin, ListView):
         else:
             # 何も返さない
             return CustomUser.objects.none()
+
+# 新規登録
+class CUsersCreateView(LoginRequiredMixin, FormView):
+    template_name = 'customuser/customuser_edit.html'
+    form_class = CustomUserForm
+    success_url = '/customusers/'

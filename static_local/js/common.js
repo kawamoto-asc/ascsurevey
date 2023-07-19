@@ -4,8 +4,23 @@ function menuControl() {
     let sidemenuToggle = document.getElementById('toggle');
     // メインコンテンツを囲むmain要素
     let page = document.getElementById('sideMenu');
+
     // 表示状態 trueで表示中 falseで非表示
     let sidemenuStatus = true;
+    // セッション情報のメニューステータスを取得
+    let sidemenuStatusStr = window.sessionStorage.getItem(['sidemenuStatus']);
+    // セットされていたらその値で更新
+    if (sidemenuStatusStr) {
+        if (sidemenuStatusStr == 'true') {
+            sidemenuStatus = true;
+        }
+        else {
+            sidemenuStatus = false;
+            if (page.style.marginLeft == "") {
+                page.style.cssText = 'margin-left: -270px';
+            }
+        }
+    }
 
     // ボタンクリック時のイベント
     sidemenuToggle.addEventListener('click', () => {
@@ -18,6 +33,8 @@ function menuControl() {
             page.style.cssText = 'margin-left: 0px';
             sidemenuStatus = true;
         }
+        // ステータスをセッションへ書き出す
+        window.sessionStorage.setItem(['sidemenuStatus'], [sidemenuStatus]);
     })
 }
 
