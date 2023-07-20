@@ -178,7 +178,7 @@ class CUsersListView(LoginRequiredMixin, ListView):
                 exact_location = Q(location_id__exact=locationid)
             if len(post) != 0 and post[0]:
                 postid = Post.objects.filter(nendo=nendo, post_code=post)[:1]
-                exact_post = Q(post_id__exact=post)
+                exact_post = Q(post_id__exact=postid)
 
             return (CustomUser.objects.select_related()
                     .filter(exact_nendo & exact_busyo & exact_location & exact_post)
