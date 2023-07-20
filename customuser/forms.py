@@ -11,7 +11,7 @@ class CustomUserQueryForm(forms.Form):
 # ユーザマスタメンテ 新規登録フォーム
 class CustomUserForm(forms.Form):
     nendo = forms.CharField(label='年度',
-        widget=forms.TextInput(attrs={'readonly': 'readonly', 'size': '5'}),
+        widget=forms.TextInput(attrs={'readonly': 'readonly', 'size': '3'}),
         )
     busyo = forms.ChoiceField(label='部署', required=False,)
     location = forms.ChoiceField(label='勤務地', required=False,)
