@@ -145,6 +145,15 @@ class CUsersListView(LoginRequiredMixin, ListView):
         return context
 
     def get_queryset(self):
+        # 初期化フラグをURLパラメータから取得
+        flg_wrk = self.request.GET.get('ini_flg')
+        # パラメータにあったら
+        if flg_wrk:
+            # 上書き
+            if flg_wrk == 'False':
+                self.ini_flg = False
+            else:
+                self.ini_flg = True
 
         # sessionに値があって、検索ボタン押下なら、セッション値でクエリ発行する。
         if not self.ini_flg and 'form_value' in self.request.session:
@@ -169,7 +178,7 @@ class CUsersListView(LoginRequiredMixin, ListView):
                 exact_location = Q(location_id__exact=locationid)
             if len(post) != 0 and post[0]:
                 postid = Post.objects.filter(nendo=nendo, post_code=post)[:1]
-                exact_post = Q(post_id__exact=post)
+                exact_post = Q(post_id__exact=postid)
 
             return (CustomUser.objects.select_related()
                     .filter(exact_nendo & exact_busyo & exact_location & exact_post)
@@ -184,3 +193,32 @@ class CUsersCreateView(LoginRequiredMixin, FormView):
     template_name = 'customuser/customuser_edit.html'
     form_class = CustomUserForm
     success_url = reverse_lazy('cusers-list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # 一応運用条件からデフォルトとして年度を取得しておく
+        nendo = Ujf.objects.get(key1=1, key2='1').naiyou4
+        # session情報から年度を取得
+        if 'form_value' in self.request.session:
+            form_value = self.request.session['form_value']
+            nendo = form_value[0]
+
+        # 部署リスト作成
+        blist = [('', '')] + list(Busyo.objects.filter(nendo=nendo).values_list('bu_code', 'bu_name').order_by('bu_code'))
+
+        # 勤務地リスト作成
+        llist = [('', '')] + list(Location.objects.filter(nendo=nendo).values_list('location_code', 'location_name').order_by('location_code'))
+
+        # 役職リスト作成
+        plist = [('', '')] + list(Post.objects.filter(nendo=nendo).values_list('post_code', 'post_name').order_by('post_code'))
+
+        cform = CustomUserForm(initial={'nendo': nendo})
+
+        cform.fields['busyo'].choices = blist
+        cform.fields['location'].choices = llist
+        cform.fields['post'].choices = plist
+
+        context['form'] = cform
+
+        return context
