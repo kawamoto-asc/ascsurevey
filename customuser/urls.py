@@ -8,5 +8,5 @@ urlpatterns = [
     path('get-busyolist', getBusyoList, name='get-busyolist'),
     path('get-locationlist', getLocationList, name='get-locationlist'),
     path('get-postlist', getPostList, name='get-postlist'),
-    path('new/', views.CUsersCreateView.as_view(), name='cusers-new'),
+    path('new/<int:pnendo>', views.CUsersCreateView.as_view(), name='cusers-new'),
 ]

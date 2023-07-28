@@ -26,7 +26,7 @@
         <section class="post-list">
             {% if not ini_flg %}
                 <div class="mb-1">
-                    <a class="btn btn-warning text-light" href="{% url 'cusers-new' %}">新規作成</a>
+                    <a class="btn btn-warning text-light" href="{% url 'cusers-new' request.session.form_value.0 %}">新規作成</a>
                     <input class="ms-3 btn btn-success opacity-75" type="submit" value="Excel出力">
                     <input class="ms-1 btn btn-success opacity-75" type="submit" value="Excel入力">
                     <!--<input class="ms-3 btn btn-danger opacity-75" type="submit" value="削除">-->

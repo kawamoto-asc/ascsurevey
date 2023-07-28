@@ -1,6 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import User
 from django.db.models import Q
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, FormView
@@ -194,31 +195,46 @@ class CUsersCreateView(LoginRequiredMixin, FormView):
     form_class = CustomUserForm
     success_url = reverse_lazy('cusers-list')
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    # formにパラメータを渡す為のオーバーライド
+    def get_form_kwargs(self, *args, **kwargs):
+         kwgs = super().get_form_kwargs(*args, **kwargs)
+         if self.request.method == 'GET':
+            print('get_form_kwargs')
+            print(self.kwargs['pnendo'])
+            #kwgs['nendo'] = self.kwargs['pnendo']
 
-        # 一応運用条件からデフォルトとして年度を取得しておく
-        nendo = Ujf.objects.get(key1=1, key2='1').naiyou4
-        # session情報から年度を取得
-        if 'form_value' in self.request.session:
-            form_value = self.request.session['form_value']
-            nendo = form_value[0]
+         return kwgs
 
-        # 部署リスト作成
-        blist = [('', '')] + list(Busyo.objects.filter(nendo=nendo).values_list('bu_code', 'bu_name').order_by('bu_code'))
+    def form_valid(self, form):
+        data = form.cleaned_data
 
-        # 勤務地リスト作成
-        llist = [('', '')] + list(Location.objects.filter(nendo=nendo).values_list('location_code', 'location_name').order_by('location_code'))
+        print('form_valid')
 
-        # 役職リスト作成
-        plist = [('', '')] + list(Post.objects.filter(nendo=nendo).values_list('post_code', 'post_name').order_by('post_code'))
+        # ユーザマスタに登録
+        cuser = CustomUser(**data)
+        cuser.save()
 
-        cform = CustomUserForm(initial={'nendo': nendo})
+        # ログインマスタに登録がなければ登録、あれば更新
+        auser = User.objects.get(username=cuser.user_id)
+        if auser:
+            print('if')
+            auser.first_name = cuser.first_name
+            auser.last_name = cuser.last_name
+            auser.email = cuser.email
+            auser.is_staff = cuser.is_staff
+            auser.save()
+        else:
+            print('else')
+            new_user = User()
+            new_user.username = cuser.user_id
+            new_user.password = cuser.user_id
+            new_user.first_name = cuser.first_name
+            new_user.last_name = cuser.last_name
+            new_user.email = cuser.email
+            new_user.is_staff = cuser.is_staff
+            new_user.is_active = True
+            new_user.is_superuser = False
+            new_user.save()
 
-        cform.fields['busyo'].choices = blist
-        cform.fields['location'].choices = llist
-        cform.fields['post'].choices = plist
-
-        context['form'] = cform
-
-        return context
+        return super().form_valid(form)
+    
