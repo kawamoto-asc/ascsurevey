@@ -197,13 +197,14 @@ class CUsersCreateView(LoginRequiredMixin, FormView):
 
     # formにパラメータを渡す為のオーバーライド
     def get_form_kwargs(self, *args, **kwargs):
-         kwgs = super().get_form_kwargs(*args, **kwargs)
-         if self.request.method == 'GET':
-            print('get_form_kwargs')
-            print(self.kwargs['pnendo'])
-            #kwgs['nendo'] = self.kwargs['pnendo']
+        kwargs = super(CUsersCreateView, self).get_form_kwargs()
 
-         return kwgs
+        # パラメータ年度、編集モード(新規）をフォームへ渡す
+        pnendo = self.kwargs['pnendo']
+        mod = "new"
+        kwargs.update({'pnendo': pnendo, 'mod': mod})
+
+        return kwargs
 
     def form_valid(self, form):
         data = form.cleaned_data
