@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
-from django.urls import reverse_lazy
 from django.views.generic import ListView, FormView
 from customuser.forms import CustomUserQueryForm, CustomUserForm
 from sureveys.models import Ujf, Busyo, Location, Post, CustomUser
@@ -193,31 +192,41 @@ class CUsersListView(LoginRequiredMixin, ListView):
 class CUsersCreateView(LoginRequiredMixin, FormView):
     template_name = 'customuser/customuser_edit.html'
     form_class = CustomUserForm
-    success_url = reverse_lazy('cusers-list')
+    success_url = '/customusers?ini_flg=False'
 
     # formにパラメータを渡す為のオーバーライド
     def get_form_kwargs(self, *args, **kwargs):
-         kwgs = super().get_form_kwargs(*args, **kwargs)
-         if self.request.method == 'GET':
-            print('get_form_kwargs')
-            print(self.kwargs['pnendo'])
-            #kwgs['nendo'] = self.kwargs['pnendo']
+        kwargs = super(CUsersCreateView, self).get_form_kwargs()
 
-         return kwgs
+        # パラメータ年度、編集モード(新規）をフォームへ渡す
+        pnendo = self.kwargs['pnendo']
+        mod = "new"
+        kwargs.update({'pnendo': pnendo, 'mod': mod})
+
+        return kwargs
 
     def form_valid(self, form):
         data = form.cleaned_data
 
-        print('form_valid')
-
         # ユーザマスタに登録
-        cuser = CustomUser(**data)
+        cuser = CustomUser()
+        cuser.nendo = data['nendo']
+        cuser.user_id = data['user_id']
+        cuser.first_name = data['first_name']
+        cuser.last_name = data['last_name']
+        cuser.email = data['email']
+        cuser.is_staff = data['is_staff']
+        cuser.post_id = Post.objects.get(nendo=data['nendo'], post_code=data['post'])
+        cuser.busyo_id = Busyo.objects.get(nendo=data['nendo'], bu_code=data['busyo'])
+        cuser.location_id = Location.objects.get(nendo=data['nendo'], location_code=data['location'])
+        cuser.created_by = self.request.user.username
+
         cuser.save()
 
-        # ログインマスタに登録がなければ登録、あれば更新
-        auser = User.objects.get(username=cuser.user_id)
-        if auser:
+        # ログインマスタに登録があれば更新、なければ登録
+        if User.objects.filter(username=cuser.user_id).exists():
             print('if')
+            auser = User.objects.get(username=cuser.user_id)
             auser.first_name = cuser.first_name
             auser.last_name = cuser.last_name
             auser.email = cuser.email

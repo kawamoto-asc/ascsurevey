@@ -33,18 +33,12 @@ class CustomUserForm(forms.Form):
     is_staff = forms.BooleanField(label='管理者権限', required=False)
 
     def __init__(self, *args, **kwargs):
+        # viewからのパラメータ受け取り
+        self.pnendo = kwargs.pop('pnendo', None)
+        self.mod = kwargs.pop('mod', None)
         super().__init__(*args, **kwargs)
 
-        '''
-        # 一応運用条件からデフォルトとして年度を取得しておく
-        nendo = Ujf.objects.get(key1=1, key2='1').naiyou4
-        # session情報から年度を取得
-        if 'form_value' in self.request.session:
-            form_value = self.request.session['form_value']
-            nendo = form_value[0]
-        self.fields['nendo'].initial = nendo'''
-        #nendo = kwargs['pnendo']
-        nendo = 2022
+        nendo = self.pnendo
         self.fields['nendo'].initial = nendo
 
         # 部署リスト作成
@@ -58,7 +52,6 @@ class CustomUserForm(forms.Form):
         # 役職リスト作成
         plist = [('', '')] + list(Post.objects.filter(nendo=nendo).values_list('post_code', 'post_name').order_by('post_code'))
         self.fields['post'].choices = plist
-
 
     def clean(self):
         nendo = self.cleaned_data['nendo']

@@ -54,10 +54,12 @@
                 </tr>
             </table>
         </form>
-        {% if form.non_field_errors %}
-            {% for error in form.non_field_errors %}
-                {{ error }}
-            {% endfor %}
-        {% endif %}
+        <div class="text-danger">
+            {% if form.non_field_errors %}
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            {% endif %}
+        </div>
     </div>
 {% endblock %}

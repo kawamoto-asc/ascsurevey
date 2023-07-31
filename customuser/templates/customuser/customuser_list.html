@@ -59,7 +59,7 @@
                                 <td>{{ udat.location_id.location_name }}</td>
                                 <td>{{ udat.post_id.post_name }}</td>
                                 <td>{{ udat.user_id }}</td>
-                                <td>{{ udat.first_name|add:" "|add:udat.last_name }}</td>
+                                <td>{{ udat.last_name|add:" "|add:udat.first_name }}</td>
                                 <td>{{ udat.email|default_if_none:"" }}</td>
                                 {% if udat.is_staff %}
                                     <td class="text-center">{% bs_icon 'check-circle-fill' color='green' %}</td>
