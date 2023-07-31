@@ -137,9 +137,9 @@ class CustomUser(models.Model):
     first_name = models.CharField('氏', max_length=128)
     last_name =  models.CharField('名', max_length=128)
     email = models.CharField('メールアドレス', max_length=128, blank=True, null=True)
-    post_id = models.ForeignKey(Post, on_delete=models.DO_NOTHING)
-    busyo_id = models.ForeignKey(Busyo, on_delete=models.DO_NOTHING)
-    location_id = models.ForeignKey(Location, on_delete=models.DO_NOTHING)
+    post_id = models.ForeignKey(Post, on_delete=models.DO_NOTHING, db_column='post_id')
+    busyo_id = models.ForeignKey(Busyo, on_delete=models.DO_NOTHING, db_column='busyo_id')
+    location_id = models.ForeignKey(Location, on_delete=models.DO_NOTHING, db_column='location_id')
     is_staff = models.BooleanField('管理者権限')
 
     created_by = models.CharField('作成者', max_length=128, blank=True, null=True)
