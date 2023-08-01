@@ -1,3 +1,4 @@
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.db.models import Q
@@ -234,7 +235,7 @@ class CUsersCreateView(LoginRequiredMixin, FormView):
         else:
             new_user = User()
             new_user.username = cuser.user_id
-            new_user.password = cuser.user_id
+            new_user.password = make_password(cuser.user_id)
             new_user.first_name = cuser.first_name
             new_user.last_name = cuser.last_name
             new_user.email = cuser.email
@@ -294,7 +295,7 @@ class CUsersEditView(LoginRequiredMixin, FormView):
             else:
                 new_user = User()
                 new_user.username = cuser.user_id
-                new_user.password = cuser.user_id
+                new_user.password = make_password(cuser.user_id)
                 new_user.first_name = cuser.first_name
                 new_user.last_name = cuser.last_name
                 new_user.email = cuser.email
