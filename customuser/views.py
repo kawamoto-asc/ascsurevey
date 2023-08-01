@@ -190,7 +190,7 @@ class CUsersListView(LoginRequiredMixin, ListView):
 
 # 新規登録
 class CUsersCreateView(LoginRequiredMixin, FormView):
-    template_name = 'customuser/customuser_edit.html'
+    template_name = 'customuser/customuser_new.html'
     form_class = CustomUserForm
     success_url = '/customusers?ini_flg=False'
 
@@ -225,7 +225,6 @@ class CUsersCreateView(LoginRequiredMixin, FormView):
 
         # ログインマスタに登録があれば更新、なければ登録
         if User.objects.filter(username=cuser.user_id).exists():
-            print('if')
             auser = User.objects.get(username=cuser.user_id)
             auser.first_name = cuser.first_name
             auser.last_name = cuser.last_name
@@ -233,7 +232,6 @@ class CUsersCreateView(LoginRequiredMixin, FormView):
             auser.is_staff = cuser.is_staff
             auser.save()
         else:
-            print('else')
             new_user = User()
             new_user.username = cuser.user_id
             new_user.password = cuser.user_id
@@ -246,4 +244,61 @@ class CUsersCreateView(LoginRequiredMixin, FormView):
             new_user.save()
 
         return super().form_valid(form)
-    
+
+# 編集・削除
+class CUsersEditView(LoginRequiredMixin, FormView):
+    template_name = 'customuser/customuser_edit.html'
+    form_class = CustomUserForm
+    success_url = '/customusers?ini_flg=False'
+
+    # formにパラメータを渡す為のオーバーライド
+    def get_form_kwargs(self, *args, **kwargs):
+        kwargs = super(CUsersEditView, self).get_form_kwargs()
+
+        # パラメータ年度、編集モード(更新）、オブジェクト情報をフォームへ渡す
+        pnendo = self.kwargs['pnendo']
+        uid = self.kwargs['id']
+        mod = "edit"
+        uobj = CustomUser.objects.get(id=uid)
+
+        kwargs.update({'pnendo': pnendo, 'mod': mod, 'uobj': uobj})
+
+        return kwargs
+
+    def form_valid(self, form):
+        data = form.cleaned_data
+
+        # ユーザマスタに更新
+        cuser = CustomUser.objects.get(nendo=data['nendo'], user_id=data['user_id'])
+        cuser.first_name = data['first_name']
+        cuser.last_name = data['last_name']
+        cuser.email = data['email']
+        cuser.is_staff = data['is_staff']
+        cuser.post_id = Post.objects.get(nendo=data['nendo'], post_code=data['post'])
+        cuser.busyo_id = Busyo.objects.get(nendo=data['nendo'], bu_code=data['busyo'])
+        cuser.location_id = Location.objects.get(nendo=data['nendo'], location_code=data['location'])
+        cuser.created_by = self.request.user.username
+
+        cuser.save()
+
+        # ログインマスタに登録があれば更新、なければ登録
+        if User.objects.filter(username=cuser.user_id).exists():
+            auser = User.objects.get(username=cuser.user_id)
+            auser.first_name = cuser.first_name
+            auser.last_name = cuser.last_name
+            auser.email = cuser.email
+            auser.is_staff = cuser.is_staff
+            auser.save()
+        else:
+            new_user = User()
+            new_user.username = cuser.user_id
+            new_user.password = cuser.user_id
+            new_user.first_name = cuser.first_name
+            new_user.last_name = cuser.last_name
+            new_user.email = cuser.email
+            new_user.is_staff = cuser.is_staff
+            new_user.is_active = True
+            new_user.is_superuser = False
+            new_user.save()
+
+        return super().form_valid(form)

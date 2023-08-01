@@ -21,12 +21,12 @@ class CustomUserForm(forms.Form):
         label='ユーザーID', max_length=128, required=True,
         widget=forms.TextInput(attrs={'size': '5'}),
         )
-    first_name = forms.CharField(
-        label='名', max_length=128, required=True,
-        widget=forms.TextInput(attrs={'size': '5'}),
-        )
     last_name =  forms.CharField(
         label='氏', max_length=128, required=True,
+        widget=forms.TextInput(attrs={'size': '5'}),
+        )
+    first_name = forms.CharField(
+        label='名', max_length=128, required=True,
         widget=forms.TextInput(attrs={'size': '5'}),
         )
     email = forms.CharField(label='メールアドレス', max_length=128, required=False)
@@ -36,6 +36,7 @@ class CustomUserForm(forms.Form):
         # viewからのパラメータ受け取り
         self.pnendo = kwargs.pop('pnendo', None)
         self.mod = kwargs.pop('mod', None)
+        self.uobj = kwargs.pop('uobj', None)
         super().__init__(*args, **kwargs)
 
         nendo = self.pnendo
@@ -53,12 +54,29 @@ class CustomUserForm(forms.Form):
         plist = [('', '')] + list(Post.objects.filter(nendo=nendo).values_list('post_code', 'post_name').order_by('post_code'))
         self.fields['post'].choices = plist
 
+        # 編集モードの場合
+        if self.mod == 'edit':
+            # ユーザIDもリードオンリー
+            self.fields['user_id'].widget.attrs['readonly'] = 'readonly'
+
+            uobj = self.uobj
+            # ユーザ情報初期化
+            self.fields['busyo'].initial = uobj.busyo_id.bu_code
+            self.fields['location'].initial = uobj.location_id.location_code
+            self.fields['post'].initial = uobj.post_id.post_code
+            self.fields['user_id'].initial = uobj.user_id
+            self.fields['last_name'].initial = uobj.last_name
+            self.fields['first_name'].initial = uobj.first_name
+            self.fields['email'].initial = uobj.email
+            self.fields['is_staff'].initial = uobj.is_staff
+
     def clean(self):
-        nendo = self.cleaned_data['nendo']
-        uid = self.cleaned_data['user_id']
-        user = CustomUser.objects.filter(
-            nendo = nendo,
-            user_id = uid,
-        ).exists()
-        if user:
-            raise ValidationError('入力した年度のユーザIDは既に登録済みです。')
+        if self.mod == 'new':
+            nendo = self.cleaned_data['nendo']
+            uid = self.cleaned_data['user_id']
+            user = CustomUser.objects.filter(
+                nendo = nendo,
+                user_id = uid,
+            ).exists()
+            if user:
+                raise ValidationError('入力した年度のユーザIDは既に登録済みです。')
