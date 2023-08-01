@@ -268,37 +268,43 @@ class CUsersEditView(LoginRequiredMixin, FormView):
     def form_valid(self, form):
         data = form.cleaned_data
 
-        # ユーザマスタに更新
-        cuser = CustomUser.objects.get(nendo=data['nendo'], user_id=data['user_id'])
-        cuser.first_name = data['first_name']
-        cuser.last_name = data['last_name']
-        cuser.email = data['email']
-        cuser.is_staff = data['is_staff']
-        cuser.post_id = Post.objects.get(nendo=data['nendo'], post_code=data['post'])
-        cuser.busyo_id = Busyo.objects.get(nendo=data['nendo'], bu_code=data['busyo'])
-        cuser.location_id = Location.objects.get(nendo=data['nendo'], location_code=data['location'])
-        cuser.created_by = self.request.user.username
+        # 更新の時
+        if "btn_update" in self.request.POST:
+            # ユーザマスタに更新
+            cuser = CustomUser.objects.get(nendo=data['nendo'], user_id=data['user_id'])
+            cuser.first_name = data['first_name']
+            cuser.last_name = data['last_name']
+            cuser.email = data['email']
+            cuser.is_staff = data['is_staff']
+            cuser.post_id = Post.objects.get(nendo=data['nendo'], post_code=data['post'])
+            cuser.busyo_id = Busyo.objects.get(nendo=data['nendo'], bu_code=data['busyo'])
+            cuser.location_id = Location.objects.get(nendo=data['nendo'], location_code=data['location'])
+            cuser.update_by = self.request.user.username
 
-        cuser.save()
+            cuser.save()
 
-        # ログインマスタに登録があれば更新、なければ登録
-        if User.objects.filter(username=cuser.user_id).exists():
-            auser = User.objects.get(username=cuser.user_id)
-            auser.first_name = cuser.first_name
-            auser.last_name = cuser.last_name
-            auser.email = cuser.email
-            auser.is_staff = cuser.is_staff
-            auser.save()
-        else:
-            new_user = User()
-            new_user.username = cuser.user_id
-            new_user.password = cuser.user_id
-            new_user.first_name = cuser.first_name
-            new_user.last_name = cuser.last_name
-            new_user.email = cuser.email
-            new_user.is_staff = cuser.is_staff
-            new_user.is_active = True
-            new_user.is_superuser = False
-            new_user.save()
+            # ログインマスタに登録があれば更新、なければ登録
+            if User.objects.filter(username=cuser.user_id).exists():
+                auser = User.objects.get(username=cuser.user_id)
+                auser.first_name = cuser.first_name
+                auser.last_name = cuser.last_name
+                auser.email = cuser.email
+                auser.is_staff = cuser.is_staff
+                auser.save()
+            else:
+                new_user = User()
+                new_user.username = cuser.user_id
+                new_user.password = cuser.user_id
+                new_user.first_name = cuser.first_name
+                new_user.last_name = cuser.last_name
+                new_user.email = cuser.email
+                new_user.is_staff = cuser.is_staff
+                new_user.is_active = True
+                new_user.is_superuser = False
+                new_user.save()
+        # 削除の時
+        elif "btn_delete" in self.request.POST:
+            cuser = CustomUser.objects.get(nendo=data['nendo'], user_id=data['user_id'])
+            cuser.delete()
 
         return super().form_valid(form)

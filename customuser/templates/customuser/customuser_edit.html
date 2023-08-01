@@ -13,10 +13,12 @@
             <table id="entry-form">
                 <tr>
                     <td colspan="3" class="text-end">
-                        <input class="ms-3 btn btn-info text-light" type="submit" value="更新">
+                        <input class="ms-3 btn btn-info text-light"
+                            type="submit" name="btn_update" value="更新" onclick="return confirm('更新しますか？')">
                     </td>
                     <td colspan="3" class="text-end">
-                        <input class="ms-3 btn btn-danger opacity-75 text-light" type="submit" value="削除">
+                        <input class="ms-3 btn btn-danger opacity-75 text-light"
+                            type="submit" name="btn_delete" value="削除" onclick="return confirm('削除しますか？')">
                     </td>
                     <td class="ps-3">
                         <a class="ms-1 btn btn-warning text-light" href="{% url 'cusers-list' %}?ini_flg=False">戻る</a>
