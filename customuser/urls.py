@@ -10,4 +10,5 @@ urlpatterns = [
     path('get-postlist', getPostList, name='get-postlist'),
     path('new/<int:pnendo>', views.CUsersCreateView.as_view(), name='cusers-new'),
     path('edit/<int:pnendo>/<int:id>', views.CUsersEditView.as_view(), name='cusers-edit'),
+    path('excelout', views.download_excel, name='cuser-download'),
 ]

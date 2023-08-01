@@ -1,6 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from sureveys.models import Ujf, Busyo, Location, Post, CustomUser
+import re
 
 # ユーザーマスタメンテナンス 検索フォーム
 class CustomUserQueryForm(forms.Form):
@@ -71,12 +72,26 @@ class CustomUserForm(forms.Form):
             self.fields['is_staff'].initial = uobj.is_staff
 
     def clean(self):
+        # 半角英数字と_@-だけ入力可のチェック用
+        reg = re.compile(r'^[A-Za-z0-9_@-]+$')
+
+        # 新規登録時だけのチェック
         if self.mod == 'new':
             nendo = self.cleaned_data['nendo']
             uid = self.cleaned_data['user_id']
+
+            if reg.match(uid) is None:
+                raise ValidationError('ユーザーIDは半角英数字か_-@で入力してください。')
+
             user = CustomUser.objects.filter(
                 nendo = nendo,
                 user_id = uid,
             ).exists()
             if user:
                 raise ValidationError('入力した年度のユーザIDは既に登録済みです。')
+        
+        # 新規、編集共通チェック
+        email = self.cleaned_data['email']
+        if email:
+            if reg.match(email) is None:
+                raise ValidationError('メールアドレスは半角英数字か_-@で入力してください。')
