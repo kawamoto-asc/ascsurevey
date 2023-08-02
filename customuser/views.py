@@ -322,10 +322,19 @@ def download_excel(request):
     wb = openpyxl.load_workbook(str(settings.BASE_DIR) + '/media/customuser.xlsx')
     ws = wb.active
 
+    # データ出力開始行
+    row = 2
+
+    # スタイルを取得
+    cellstylelist = []
+    for i in range(16):
+        cellstyle = ws.cell(row, (i+1))._style
+        cellstylelist.append(cellstyle)
+
     #ws.cell(2,1).value = "test"
     ulist = makeCustomUserList(request)
-    row = 2
     for udat in ulist:
+        # 値を設定
         ws.cell(row, 1).value = udat.nendo
         ws.cell(row, 2).value = udat.busyo_id.bu_code
         ws.cell(row, 3).value = udat.busyo_id.bu_name
@@ -342,9 +351,12 @@ def download_excel(request):
         ws.cell(row, 14).value = udat.created_at.astimezone(timezone('Asia/Tokyo')).strftime('%Y/%m/%d %H:%M:%S')
         ws.cell(row, 15).value = udat.update_by
         ws.cell(row, 16).value = udat.updated_at.astimezone(timezone('Asia/Tokyo')).strftime('%Y/%m/%d %H:%M:%S')
+        # スタイルを設定
+        for i in range(16):
+            ws.cell(row, (i+1))._style = cellstylelist[i]
         row += 1
         
-
+    # ダウンロード
     response = HttpResponse(content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment; filename=%s' % 'customuser.xlsx'
     wb.save(response)
