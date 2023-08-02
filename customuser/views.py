@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
@@ -7,6 +8,8 @@ from django.shortcuts import render
 from django.views.generic import ListView, FormView
 from customuser.forms import CustomUserQueryForm, CustomUserForm
 from sureveys.models import Ujf, Busyo, Location, Post, CustomUser
+from pytz import timezone
+import openpyxl
 
 # 部署リスト取得処理 FetchAPI用
 # パラメータ：nendo 年度
@@ -61,6 +64,36 @@ def getPostList(request):
              'rlist': pstlst,
         }
         return JsonResponse(data)
+
+# 検索条件(セッション値）から（検索クエリを発行）該当リストを返す
+def makeCustomUserList(request):
+    form_value = request.session['form_value']
+    nendo = form_value[0]
+    busyo = form_value[1]
+    location = form_value[2]
+    post = form_value[3]
+
+    # 検索条件
+    exact_nendo = Q()
+    exact_busyo = Q()
+    exact_location = Q()
+    exact_post = Q()
+    if len(nendo) != 0 and nendo[0]:
+        exact_nendo = Q(nendo__exact=nendo)
+    if len(busyo) != 0 and busyo[0]:
+        busyoid = Busyo.objects.filter(nendo=nendo, bu_code=busyo)[:1]
+        exact_busyo = Q(busyo_id__exact=busyoid)
+    if len(location) != 0 and location[0]:
+        locationid = Location.objects.filter(nendo=nendo, location_code=location)[:1]
+        exact_location = Q(location_id__exact=locationid)
+    if len(post) != 0 and post[0]:
+        postid = Post.objects.filter(nendo=nendo, post_code=post)[:1]
+        exact_post = Q(post_id__exact=postid)
+
+    return (CustomUser.objects.select_related()
+            .filter(exact_nendo & exact_busyo & exact_location & exact_post)
+            .order_by('busyo_id__bu_code', 'location_id__location_code', 'post_id__post_code', 'user_id')
+        )
 
 # ユーザーマスタメンテナンス 一覧
 class CUsersListView(LoginRequiredMixin, ListView):
@@ -158,33 +191,7 @@ class CUsersListView(LoginRequiredMixin, ListView):
 
         # sessionに値があって、検索ボタン押下なら、セッション値でクエリ発行する。
         if not self.ini_flg and 'form_value' in self.request.session:
-            form_value = self.request.session['form_value']
-            nendo = form_value[0]
-            busyo = form_value[1]
-            location = form_value[2]
-            post = form_value[3]
-
-            # 検索条件
-            exact_nendo = Q()
-            exact_busyo = Q()
-            exact_location = Q()
-            exact_post = Q()
-            if len(nendo) != 0 and nendo[0]:
-                exact_nendo = Q(nendo__exact=nendo)
-            if len(busyo) != 0 and busyo[0]:
-                busyoid = Busyo.objects.filter(nendo=nendo, bu_code=busyo)[:1]
-                exact_busyo = Q(busyo_id__exact=busyoid)
-            if len(location) != 0 and location[0]:
-                locationid = Location.objects.filter(nendo=nendo, location_code=location)[:1]
-                exact_location = Q(location_id__exact=locationid)
-            if len(post) != 0 and post[0]:
-                postid = Post.objects.filter(nendo=nendo, post_code=post)[:1]
-                exact_post = Q(post_id__exact=postid)
-
-            return (CustomUser.objects.select_related()
-                    .filter(exact_nendo & exact_busyo & exact_location & exact_post)
-                    .order_by('busyo_id__bu_code', 'location_id__location_code', 'post_id__post_code', 'user_id')
-                )
+            return makeCustomUserList(self.request)
         else:
             # 何も返さない
             return CustomUser.objects.none()
@@ -309,3 +316,49 @@ class CUsersEditView(LoginRequiredMixin, FormView):
             cuser.delete()
 
         return super().form_valid(form)
+
+# Excelダウンロード
+def download_excel(request):
+    wb = openpyxl.load_workbook(str(settings.BASE_DIR) + '/media/customuser.xlsx')
+    ws = wb.active
+
+    # データ出力開始行
+    row = 2
+
+    # スタイルを取得
+    cellstylelist = []
+    for i in range(16):
+        cellstyle = ws.cell(row, (i+1))._style
+        cellstylelist.append(cellstyle)
+
+    #ws.cell(2,1).value = "test"
+    ulist = makeCustomUserList(request)
+    for udat in ulist:
+        # 値を設定
+        ws.cell(row, 1).value = udat.nendo
+        ws.cell(row, 2).value = udat.busyo_id.bu_code
+        ws.cell(row, 3).value = udat.busyo_id.bu_name
+        ws.cell(row, 4).value = udat.location_id.location_code
+        ws.cell(row, 5).value = udat.location_id.location_name
+        ws.cell(row, 6).value = udat.post_id.post_code
+        ws.cell(row, 7).value = udat.post_id.post_name
+        ws.cell(row, 8).value = udat.user_id
+        ws.cell(row, 9).value = udat.last_name
+        ws.cell(row, 10).value = udat.first_name
+        ws.cell(row, 11).value = udat.email
+        ws.cell(row, 12).value = udat.is_staff
+        ws.cell(row, 13).value = udat.created_by
+        ws.cell(row, 14).value = udat.created_at.astimezone(timezone('Asia/Tokyo')).strftime('%Y/%m/%d %H:%M:%S')
+        ws.cell(row, 15).value = udat.update_by
+        ws.cell(row, 16).value = udat.updated_at.astimezone(timezone('Asia/Tokyo')).strftime('%Y/%m/%d %H:%M:%S')
+        # スタイルを設定
+        for i in range(16):
+            ws.cell(row, (i+1))._style = cellstylelist[i]
+        row += 1
+        
+    # ダウンロード
+    response = HttpResponse(content_type='application/vnd.ms-excel')
+    response['Content-Disposition'] = 'attachment; filename=%s' % 'customuser.xlsx'
+    wb.save(response)
+
+    return response
