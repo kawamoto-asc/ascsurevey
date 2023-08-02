@@ -33,46 +33,48 @@
                 {% if object_list|length == 0 %}
                     <p>検索結果が存在しません。</p>
                 {% else %}
-                    <table class="table table-hover table-bordered">
-                        <thead class="table-light">
-                            <tr>
-                                <th>年度</th>
-                                <th>部署名</th>
-                                <th>勤務地</th>
-                                <th>役職</th>
-                                <th>ユーザID</th>
-                                <th>氏 名</th>
-                                <th>メールアドレス</th>
-                                <th>管理者権限</th>
-                                <th>登録者</th>
-                                <th>登録日</th>
-                                <th>更新者</th>
-                                <th>更新日</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        {% for udat in object_list %}
-                            <tr>
-                                <td>{{ udat.nendo }}</td>
-                                <td>{{ udat.busyo_id.bu_name }}</td>
-                                <td>{{ udat.location_id.location_name }}</td>
-                                <td>{{ udat.post_id.post_name }}</td>
-                                <td><a href="{% url 'cusers-edit' request.session.form_value.0 udat.id %}">{{ udat.user_id }}</a></td>
-                                <td>{{ udat.last_name|add:" "|add:udat.first_name }}</td>
-                                <td>{{ udat.email|default_if_none:"" }}</td>
-                                {% if udat.is_staff %}
-                                    <td class="text-center">{% bs_icon 'check-circle-fill' color='green' %}</td>
-                                {% else %}
-                                    <td class="text-center">{% bs_icon 'x-circle-fill' color='red' %}</td>
-                                {% endif %}
-                                <td>{{ udat.created_by|default_if_none:"" }}</td>
-                                <td>{{ udat.created_at|default_if_none:""|date:"Y/m/d H:i" }}</td>
-                                <td>{{ udat.update_by|default_if_none:"" }}</td>
-                                <td>{{ udat.updated_at|default_if_none:""|date:"Y/m/d H:i" }}</td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+                    <div class="table-responsive" id="result-div">
+                        <table class="table table-bordered">
+                            <thead class="sticky-top table-light">
+                                <tr>
+                                    <th>年度</th>
+                                    <th>部署名</th>
+                                    <th>勤務地</th>
+                                    <th>役職</th>
+                                    <th>ユーザID</th>
+                                    <th>氏 名</th>
+                                    <th>メールアドレス</th>
+                                    <th>管理者権限</th>
+                                    <th>登録者</th>
+                                    <th>登録日</th>
+                                    <th>更新者</th>
+                                    <th>更新日</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for udat in object_list %}
+                                <tr>
+                                    <td>{{ udat.nendo }}</td>
+                                    <td>{{ udat.busyo_id.bu_name }}</td>
+                                    <td>{{ udat.location_id.location_name }}</td>
+                                    <td>{{ udat.post_id.post_name }}</td>
+                                    <td><a href="{% url 'cusers-edit' request.session.form_value.0 udat.id %}">{{ udat.user_id }}</a></td>
+                                    <td>{{ udat.last_name|add:" "|add:udat.first_name }}</td>
+                                    <td>{{ udat.email|default_if_none:"" }}</td>
+                                    {% if udat.is_staff %}
+                                        <td class="text-center">{% bs_icon 'check-circle-fill' color='green' %}</td>
+                                    {% else %}
+                                        <td class="text-center">{% bs_icon 'x-circle-fill' color='red' %}</td>
+                                    {% endif %}
+                                    <td>{{ udat.created_by|default_if_none:"" }}</td>
+                                    <td>{{ udat.created_at|default_if_none:""|date:"Y/m/d H:i" }}</td>
+                                    <td>{{ udat.update_by|default_if_none:"" }}</td>
+                                    <td>{{ udat.updated_at|default_if_none:""|date:"Y/m/d H:i" }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 {% endif %}
             {% endif %}
         </section>
@@ -89,6 +91,13 @@
             renewSelectList(pnendo, '/customusers/get-locationlist', '#id_location');
             // 役職リスト更新
             renewSelectList(pnendo, '/customusers/get-postlist', '#id_post');
+        }
+
+        // テーブルのヘッダ固定用divの高さ設定
+        let pdiv = document.querySelector('#result-div');
+        if(pdiv) {
+            let ht = document.documentElement.clientHeight - 250;
+            pdiv.style.height = ht;
         }
     </script>
 {% endblock %}
