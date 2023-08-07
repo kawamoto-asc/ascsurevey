@@ -28,7 +28,7 @@
                 <div class="mb-1">
                     <a class="btn btn-warning text-light" href="{% url 'cusers-new' request.session.form_value.0 %}">新規作成</a>
                     <a class="ms-3 btn btn-success opacity-75" href="{% url 'cuser-download' %}">Excel出力</a>
-                    <input class="ms-1 btn btn-success opacity-75" type="submit" value="Excel入力">
+                    <a class="ms-1 btn btn-success opacity-75" href="{% url 'cuser-upload' %}">Excel入力</a>
                 </div>
                 {% if object_list|length == 0 %}
                     <p>検索結果が存在しません。</p>

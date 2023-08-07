@@ -4,12 +4,12 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
 from django.views.generic import ListView, FormView
-from customuser.forms import CustomUserQueryForm, CustomUserForm
+from customuser.forms import CustomUserQueryForm, CustomUserForm, FileUploadForm
 from sureveys.models import Ujf, Busyo, Location, Post, CustomUser
 from pytz import timezone
 import openpyxl
+import pandas as pd
 
 # 部署リスト取得処理 FetchAPI用
 # パラメータ：nendo 年度
@@ -362,3 +362,29 @@ def download_excel(request):
     wb.save(response)
 
     return response
+
+# Excel アップロード
+class FileUploadView(LoginRequiredMixin, FormView):
+    template_name = 'customuser/fileupload.html'
+    form_class = FileUploadForm
+    success_url = '/customusers?ini_flg=False'
+
+    def form_valid(self, form):
+        # Excel取込み
+        df = pd.read_excel(form.cleaned_data['file'], header=0)
+
+        # エラーチェック
+        # 行数はIndexが0からで、ヘッダ1行を除くので+2
+        for i in range(df.shape[0]) :
+            ldat = df.iloc[i]
+            # 年度チェック
+            strnendo = str(ldat['年度'])
+            if strnendo == 'nan':
+                form.add_error(None, '年度の入力がありません。(%s行目)' % str((i+2)))
+            elif not strnendo.isdecimal():
+                form.add_error(None, '年度に数字以外の文字の入力があります。(%s行目)' % str((i+2)))
+
+        if form.non_field_errors:
+            return super().form_invalid(form)
+        
+        return super().form_valid(form)
