@@ -8,6 +8,7 @@ from django.views.generic import ListView, FormView
 from customuser.forms import CustomUserQueryForm, CustomUserForm, FileUploadForm
 from sureveys.models import Ujf, Busyo, Location, Post, CustomUser
 from pytz import timezone
+import unicodedata
 import openpyxl
 import pandas as pd
 
@@ -374,17 +375,122 @@ class FileUploadView(LoginRequiredMixin, FormView):
         df = pd.read_excel(form.cleaned_data['file'], header=0)
 
         # エラーチェック
+        # 組合せチェック用
+        budic = dict()
+        lodic = dict()
+        podic = dict()
         # 行数はIndexが0からで、ヘッダ1行を除くので+2
         for i in range(df.shape[0]) :
             ldat = df.iloc[i]
+
             # 年度チェック
             strnendo = str(ldat['年度'])
+            nendo = int('0')
             if strnendo == 'nan':
                 form.add_error(None, '年度の入力がありません。(%s行目)' % str((i+2)))
             elif not strnendo.isdecimal():
                 form.add_error(None, '年度に数字以外の文字の入力があります。(%s行目)' % str((i+2)))
+            else:
+                nendo = int(strnendo)
+            
+            # 部署チェック
+            str_bucode = str(ldat['部署'])
+            if str_bucode == 'nan':
+                form.add_error(None, '部署コードの入力がありません。(%s行目)' % str((i+2)))
+            else:
+                # コードが文字列じゃなかったら
+                if type(ldat['部署']) is not str:
+                    # x.0を消す
+                    if str_bucode.endswith('.0'):
+                        str_bucode = str_bucode[:(len(str_bucode)-2)]
+            str_buname = str(ldat[2])
+            if str_buname == 'nan':
+                form.add_error(None, '部署名の入力がありません。(%s行目)' % str((i+2)))
 
-        if form.non_field_errors:
+            if nendo != 0 and str_bucode != 'nan' and str_buname != 'nan':
+                # 年度と部署コードを半角に変換してキーを作成
+                bukey = str(nendo) + '_' + unicodedata.normalize('NFKC', str_bucode)
+                # キーを検索
+                if bukey in budic:
+                    # キーが登録済みなのに、名前が違ったらエラー
+                    if budic[bukey] != str_buname:
+                        form.add_error(None, '異なる部署名の部署コードが存在します。(%s行目)' % str((i+2)))
+                else:
+                    # 未登録なら登録
+                    budic[bukey] = str_buname
+
+            # 勤務地チェック
+            str_loccode = str(ldat['勤務地'])
+            if str_loccode == 'nan':
+                form.add_error(None, '勤務地コードの入力がありません。(%s行目)' % str((i+2)))
+            else:
+                # コードが文字列じゃなかったら
+                if type(ldat['勤務地']) is not str:
+                    # x.0を消す
+                    if str_loccode.endswith('.0'):
+                        str_loccode = str_loccode[:(len(str_loccode)-2)]
+            str_locname = str(ldat[4])
+            if str_locname == 'nan':
+                form.add_error(None, '勤務地名の入力がありません。(%s行目)' % str((i+2)))
+
+            if nendo != 0 and str_loccode != 'nan' and str_locname != 'nan':
+                # 年度と勤務地コードを半角に変換してキーを作成
+                lockey = str(nendo) + '_' + unicodedata.normalize('NFKC', str_loccode)
+                # キーを検索
+                if lockey in lodic:
+                    # キーが登録済みなのに、名前が違ったらエラー
+                    if lodic[lockey] != str_locname:
+                        form.add_error(None, '異なる勤務地名の勤務地コードが存在します。(%s行目)' % str((i+2)))
+                else:
+                    # 未登録なら登録
+                    lodic[lockey] = str_locname
+            
+            # 役職チェック
+            str_pstcode = str(ldat['役職'])
+            if str_pstcode == 'nan':
+                form.add_error(None, '役職コードの入力がありません。(%s行目)' % str((i+2)))
+            else:
+                # コードが文字列じゃなかったら
+                if type(ldat['役職']) is not str:
+                    # x.0を消す
+                    if str_pstcode.endswith('.0'):
+                        str_pstcode = str_pstcode[:(len(str_pstcode)-2)]
+            str_pstname = str(ldat[6])
+            if str_pstname == 'nan':
+                form.add_error(None, '役職名の入力がありません。(%s行目)' % str((i+2)))
+
+            if nendo != 0 and str_pstcode != 'nan' and str_pstname != 'nan':
+                # 年度と役職コードを半角に変換してキーを作成
+                pstkey = str(nendo) + '_' + unicodedata.normalize('NFKC', str_pstcode)
+                # キーを検索
+                if pstkey in podic:
+                    # キーが登録済みなのに、名前が違ったらエラー
+                    if podic[pstkey] != str_pstname:
+                        form.add_error(None, '異なる役職名の役職コードが存在します。(%s行目)' % str((i+2)))
+                else:
+                    # 未登録なら登録
+                    podic[pstkey] = str_pstname
+
+            # ユーザ情報必須入力チェック
+            str_userid = str(ldat['ユーザーID'])
+            if str_userid == 'nan':
+                form.add_error(None, 'ユーザーIDの入力がありません。(%s行目)' % str((i+2)))
+            str_name1 = str(ldat['氏名'])
+            if str_name1 == 'nan':
+                form.add_error(None, '氏名の入力がありません。(%s行目)' % str((i+2)))
+            str_name2 = str(ldat[9])
+            if str_name2 == 'nan':
+                form.add_error(None, '氏名の入力がありません。(%s行目)' % str((i+2)))
+
+        # エラーがあったら終了
+        if form.non_field_errors():
             return super().form_invalid(form)
-        
+
+        # エラーがなければ登録処理
+        # 役職マスタ
+        for pkey in podic.keys():
+            splist = pkey.split('_')
+            nendo = splist[0]
+            code = splist[1]
+
         return super().form_valid(form)
