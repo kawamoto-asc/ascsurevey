@@ -14,7 +14,8 @@
             <table>
                 <tr>
                     <td>{{ form.file }}</td>
-                    <td><button class="ms-3 btn btn-info text-light" type="submit">実行</button></td>
+                    <td><button class="ms-3 btn btn-info text-light" type="submit"
+                            onclick="document.querySelector('#loading').classList.remove('d-none')">実行</button></td>
                     <td class="ps-3">
                         <a class="ms-1 btn btn-warning text-light" href="{% url 'cusers-list' %}?ini_flg=False">戻る</a>
                     </td>
@@ -33,6 +34,15 @@
                 {% endfor %}
             {% endif %}
             </table>
+        </div>
+
+        <div id="loading" class="position-absolute top-0 start-0 w-100 h-100 d-none">
+            <div class="text-center position-absolute top-50 start-50 w-100 translate-middle">
+                <div class="spinner-border text-info" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="pt-2 ps-3">処理中です。。。</div>
+            </div>
         </div>
     </div>
 {% endblock %}

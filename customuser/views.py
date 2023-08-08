@@ -487,10 +487,128 @@ class FileUploadView(LoginRequiredMixin, FormView):
             return super().form_invalid(form)
 
         # エラーがなければ登録処理
-        # 役職マスタ
+        # 部署
+        for bkey in budic.keys():
+            splist = bkey.split('_')
+            nendo = splist[0]
+            code = splist[1]
+            name = budic[bkey]
+            # 部署マスタにあれば更新、なければ登録
+            if Busyo.objects.filter(nendo=nendo, bu_code=code).exists():
+                busyodat = Busyo.objects.get(nendo=nendo, bu_code=code)
+                busyodat.bu_name = name
+                busyodat.update_by = self.request.user.username
+                busyodat.save()
+            else:
+                busyodat = Busyo()
+                busyodat.nendo = nendo
+                busyodat.bu_code = code
+                busyodat.bu_name = name
+                busyodat.created_by = self.request.user.username
+                busyodat.save()
+
+        # 勤務地
+        for lkey in lodic.keys():
+            splist = lkey.split('_')
+            nendo = splist[0]
+            code = splist[1]
+            name = budic[lkey]
+            # 勤務地マスタにあれば更新、なければ登録
+            if Location.objects.filter(nendo=nendo, location_code=code).exists():
+                locdat = Location.objects.get(nendo=nendo, location_code=code)
+                locdat.location_name = name
+                locdat.update_by = self.request.user.username
+                locdat.save()
+            else:
+                locdat = Location()
+                locdat.nendo = nendo
+                locdat.location_code = code
+                locdat.location_name = name
+                locdat.created_by = self.request.user.username
+                locdat.save()
+
+        # 役職
         for pkey in podic.keys():
             splist = pkey.split('_')
             nendo = splist[0]
             code = splist[1]
+            name = podic[pkey]
+            # 役職マスタにあれば更新、なければ登録
+            if Post.objects.filter(nendo=nendo, post_code=code).exists():
+                locdat = Post.objects.get(nendo=nendo, post_code=code)
+                locdat.post_name = name
+                locdat.update_by = self.request.user.username
+                locdat.save()
+            else:
+                locdat = Post()
+                locdat.nendo = nendo
+                locdat.post_code = code
+                locdat.post_name = name
+                locdat.created_by = self.request.user.username
+                locdat.save()
+
+        # ユーザマスタはファイルから
+        for i in range(df.shape[0]) :
+            ldat = df.iloc[i]
+
+            nendo = int(ldat['年度'])
+            bu_code = int(ldat['部署'])
+            loc_code = int(ldat['勤務地'])
+            post_code = int(ldat['役職'])
+            user_id = ldat['ユーザーID']
+            last_name = ldat['氏名']
+            first_name = ldat[9]
+            email = ldat['メールアドレス']
+            if type(email) is not str and str(email) == 'nan':
+                email = ''
+            staff = False
+            if type(ldat['管理者権限']) is bool and ldat['管理者権限'] == True:
+                staff = True
+
+            # ユーザマスタに登録があれば更新、なければ登録
+            if CustomUser.objects.filter(nendo=nendo, user_id=user_id).exists():
+                cuser = CustomUser.objects.get(nendo=nendo, user_id=user_id)
+                cuser.last_name = last_name
+                cuser.first_name = first_name
+                cuser.email = email
+                cuser.is_staff = staff
+                cuser.post_id = Post.objects.get(nendo=nendo, post_code=post_code)
+                cuser.busyo_id = Busyo.objects.get(nendo=nendo, bu_code=bu_code)
+                cuser.location_id = Location.objects.get(nendo=nendo, location_code=loc_code)
+                cuser.update_by = self.request.user.username
+                cuser.save()
+            else:
+                cuser = CustomUser()
+                cuser.nendo = nendo
+                cuser.user_id = user_id
+                cuser.last_name = last_name
+                cuser.first_name = first_name
+                cuser.email = email
+                cuser.is_staff = staff
+                cuser.post_id = Post.objects.get(nendo=nendo, post_code=post_code)
+                cuser.busyo_id = Busyo.objects.get(nendo=nendo, bu_code=bu_code)
+                cuser.location_id = Location.objects.get(nendo=nendo, location_code=loc_code)
+                cuser.created_by = self.request.user.username
+                cuser.save()
+
+            # ログインマスタに登録があれば更新、なければ登録
+            if User.objects.filter(username=user_id).exists():
+                auser = User.objects.get(username=user_id)
+                auser.first_name = first_name
+                auser.last_name = last_name
+                auser.email = email
+                auser.is_staff = staff
+                auser.save()
+            else:
+                new_user = User()
+                new_user.username = user_id
+                new_user.password = make_password(user_id)
+                new_user.first_name = first_name
+                new_user.last_name = last_name
+                new_user.email = email
+                new_user.is_staff = staff
+                new_user.is_active = True
+                new_user.is_superuser = False
+                new_user.save()
 
         return super().form_valid(form)
