@@ -95,3 +95,14 @@ class CustomUserForm(forms.Form):
         if email:
             if reg.match(email) is None:
                 raise ValidationError('メールアドレスは半角英数字か_-@で入力してください。')
+
+# Excel入力フォーム
+class FileUploadForm(forms.Form):
+    file = forms.FileField(label='ファイル', required=True,)
+
+    def clean_file(self):
+        # Excelファイルかどうかのチェック
+        file = self.cleaned_data['file']
+        if not file.name.endswith('xlsx'):
+            raise ValidationError('xlsxファイルを選択してください。')
+        return file
