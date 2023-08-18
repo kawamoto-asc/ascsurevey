@@ -72,8 +72,8 @@ class CustomUserForm(forms.Form):
             self.fields['is_staff'].initial = uobj.is_staff
 
     def clean(self):
-        # 半角英数字と_@-だけ入力可のチェック用
-        reg = re.compile(r'^[A-Za-z0-9_@-]+$')
+        # 半角英数字と_@-.だけ入力可のチェック用
+        reg = re.compile(r'^[A-Za-z0-9_@\-\.]+$')
 
         # 新規登録時だけのチェック
         if self.mod == 'new':
