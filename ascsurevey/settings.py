@@ -138,8 +138,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ログイン・ログアウト時 リダイレクト先
 LOGIN_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/ascsurevey/'
+LOGOUT_REDIRECT_URL = '/ascsurevey/'
 
 # SQLチェックの為のログ設定 本番時は削除
 '''
