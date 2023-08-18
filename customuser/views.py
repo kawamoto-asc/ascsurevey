@@ -562,7 +562,7 @@ class FileUploadView(LoginRequiredMixin, FormView):
             if type(email) is not str and str(email) == 'nan':
                 email = ''
             staff = False
-            if type(ldat['管理者権限']) is bool and ldat['管理者権限'] == True:
+            if ldat['管理者権限'] == True:
                 staff = True
 
             # ユーザマスタに登録があれば更新、なければ登録
