@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% load bootstrap_icons %}
 
 {% block main %}
     <div>
@@ -62,9 +61,9 @@
                                     <td>{{ udat.last_name|add:" "|add:udat.first_name }}</td>
                                     <td>{{ udat.email|default_if_none:"" }}</td>
                                     {% if udat.is_staff %}
-                                        <td class="text-center">{% bs_icon 'check-circle-fill' color='green' %}</td>
+                                        <td class="text-center bi bi-check-circle-fill" style="color:green"></td>
                                     {% else %}
-                                        <td class="text-center">{% bs_icon 'x-circle-fill' color='red' %}</td>
+                                        <td class="text-center bi bi-x-circle-fill" style="color:red"></td>
                                     {% endif %}
                                     <td>{{ udat.created_by|default_if_none:"" }}</td>
                                     <td>{{ udat.created_at|default_if_none:""|date:"Y/m/d H:i" }}</td>

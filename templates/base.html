@@ -1,6 +1,5 @@
 {% load static %}
 {% load django_bootstrap5 %}
-{% load bootstrap_icons %}
 <html>
 <head>
     <meta charset="utf-8">
@@ -9,6 +8,7 @@
     {% bootstrap_javascript %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'customuser/css/customuser.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'bootstrap-icons-1.10.5/font/bootstrap-icons.css' %}">
     <script src="{% static 'js/common.js' %}"></script>
     {% block extraheader %}{% endblock %}
 </head>
@@ -63,7 +63,7 @@
             <div class="border shadow-sm d-flex flex-row bg-primary bg-opacity-10 justify-content-between">
                 <div class="d-flex flex-row align-items-center">
                     <div class="navbar-brand toggle-menu">
-                        <button class="btn" id="toggle">{% bs_icon 'justify' size='1.5em' %}</button>
+                        <button class="btn bi bi-justify" id="toggle" style="font-size:1.5em"></button>
                     </div>
                     <div class="fs-5">Dashboard</div>
                 </div>
