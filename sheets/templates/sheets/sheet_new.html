@@ -12,8 +12,8 @@
             {% csrf_token %}
             <div class="d-flex justify-content-end">
                 <div>
-                    <input class="ms-3 btn btn-info text-light" type="submit" value="登録">
-                    <a class="ms-1 btn btn-warning text-light" href="{% url 'sheets-list' %}?ini_flg=False">戻る</a>
+                    <input class="btn btn-info text-light" type="submit" value="登録">
+                    <a class="ms-3 me-3 btn btn-warning text-light" href="{% url 'sheets-list' %}?ini_flg=False">戻る</a>
                 </div>
             </div>
             {% include './sheet_detail.html' %}

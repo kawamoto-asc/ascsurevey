@@ -26,8 +26,8 @@
             {% if not ini_flg %}
                 <div class="mb-1">
                     <a class="btn btn-warning text-light" href="{% url 'sheet-new' request.session.form_value.0 %}">新規作成</a>
-                    <a class="ms-3 btn btn-success opacity-75" href="#">Excel出力</a>
-                    <a class="ms-1 btn btn-success opacity-75" href="#">Excel入力</a>
+                    <!-- 編集画面へ移動の予定 <a class="ms-3 btn btn-success opacity-75" href="#">Excel出力</a>-->
+                    <a class="ms-3 btn btn-success opacity-75" href="#">Excel入力</a>
                 </div>
                 {% if object_list|length == 0 %}
                     <p>検索結果が存在しません。</p>
@@ -36,13 +36,13 @@
                     <table class="table table-bordered">
                         <thead class="sticky-top table-light">
                             <tr>
-                                <th>年度</th>
-                                <th>シート名</th>
-                                <th>アンケートタイトル</th>
-                                <th>登録者</th>
-                                <th>登録日</th>
-                                <th>更新者</th>
-                                <th>更新日</th>
+                                <th>{{ sdat.nendo.label_tag }}</th>
+                                <th>{{ sdat.sheet_name.label_tag }}</th>
+                                <th>{{ sdat.title.label_tag }}</th>
+                                <th>{{ sdat.created_by.label_tag }}</th>
+                                <th>{{ sdat.created_at.label_tag }}</th>
+                                <th>{{ sdat.update_by.label_tag }}</th>
+                                <th>{{ sdat.updated_at.label_tag }}</th>
                             </tr>
                         </thead>
                         <tbody>

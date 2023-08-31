@@ -12,7 +12,7 @@ class SheetForm(forms.Form):
         widget=forms.TextInput(attrs={'readonly': 'readonly', 'size': '3'}),
         )
     sheet_name = forms.CharField(label='シート名', required=True,)
-    title = forms.CharField(label='アンケートタイトル', required=True,)
+    title = forms.CharField(label='アンケート名', required=True,)
     input_type = forms.ChoiceField(label='入力形式', choices=INPUT_TYPE_CHOICES, required=True,)
     dsp_no = forms.IntegerField(
         label='表示順', required=True,
