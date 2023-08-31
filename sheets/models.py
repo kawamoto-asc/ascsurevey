@@ -1,6 +1,6 @@
 from django.db import models
 
-from .consts import INPUT_TYPE_CHOICES
+from sheets.consts import INPUT_TYPE_CHOICES
 
 # シートマスタ
 class Sheets(models.Model):
@@ -14,6 +14,15 @@ class Sheets(models.Model):
     update_by = models.CharField('更新者', max_length=128, blank=True, null=True)
     created_at = models.DateTimeField('作成日', auto_now_add=True)
     updated_at = models.DateTimeField('更新日', auto_now=True)
+
+    # ユニークキー設定
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+            fields = ['nendo', 'sheet_name'],
+            name = 'sheet_unique'
+            ),
+        ]
 
     def __str__(self):
         return self.sheet_name

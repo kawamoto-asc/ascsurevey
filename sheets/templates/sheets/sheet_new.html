@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block main %}
+    <div>
+        <nav aria-label="breadcrumb" style="width:100%;">
+            <ol class="breadcrumb pt-3 fs-5">
+                <li class="breadcrumb-item"><a href="{% url 'cusers-list' %}">シートマスタメンテナンス</a></li>
+                <li class="breadcrumb-item active" aria-current="page">新規登録</li>
+            </ol>
+        </nav>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="d-flex justify-content-end">
+                <div>
+                    <input class="ms-3 btn btn-info text-light" type="submit" value="登録">
+                    <a class="ms-1 btn btn-warning text-light" href="{% url 'sheets-list' %}?ini_flg=False">戻る</a>
+                </div>
+            </div>
+            {% include './sheet_detail.html' %}
+        </form>
+        <div class="text-danger">
+            {% if form.non_field_errors %}
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
