@@ -10,7 +10,7 @@ class CustomUserQueryForm(forms.Form):
     location = forms.ChoiceField(label='勤務地', required=False,)
     post = forms.ChoiceField(label='役職', required=False,)
 
-# ユーザマスタメンテ 新規登録フォーム
+# ユーザマスタメンテ 登録・編集フォーム
 class CustomUserForm(forms.Form):
     nendo = forms.CharField(label='年度',
         widget=forms.TextInput(attrs={'readonly': 'readonly', 'size': '3'}),

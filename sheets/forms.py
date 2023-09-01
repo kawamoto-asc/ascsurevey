@@ -6,7 +6,7 @@ from sheets.consts import INPUT_TYPE_CHOICES
 class SheetQueryForm(forms.Form):
     nendo = forms.ChoiceField(label='年度', required=True, disabled=False,)
 
-# シートマスタメンテ 新規登録フォーム
+# シートマスタ 登録・編集フォーム
 class SheetForm(forms.Form):
     nendo = forms.CharField(label='年度',
         widget=forms.TextInput(attrs={'readonly': 'readonly', 'size': '3'}),
@@ -71,7 +71,25 @@ class SheetForm(forms.Form):
         if email:
             if reg.match(email) is None:
                 raise ValidationError('メールアドレスは半角英数字か_-@で入力してください。')
+'''
+                
+# カラムマスタ 登録・編集フォーム
+class ItemForm(forms.Form):
+    item_no = forms.IntegerField(
+        label='項目No.', required=True,
+        widget=forms.NumberInput(attrs={'class': 'ShortNumberInput'}),
+    )
+    content = forms.CharField(
+        label='内容', required=True,
+        widget=forms.Textarea(attrs={'cols': 50, 'rows': 3,})
+    )
+    input_type = forms.ChoiceField(label='入力タイプ', choices=INPUT_TYPE_CHOICES,required=True,)
+    ck_delete = forms.BooleanField(
+        label='削除',
+        widget=forms.CheckboxInput(attrs={'class': 'check'}),
+    )
 
+'''
 # Excel入力フォーム
 class FileUploadForm(forms.Form):
     file = forms.FileField(label='ファイル', required=True,)

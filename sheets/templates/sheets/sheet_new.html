@@ -8,22 +8,39 @@
                 <li class="breadcrumb-item active" aria-current="page">新規登録</li>
             </ol>
         </nav>
-        <form method="POST">
+        <form method="POST" name="form_sheet" id="form_sheet">
             {% csrf_token %}
             <div class="d-flex justify-content-end">
                 <div>
-                    <input class="btn btn-info text-light" type="submit" value="登録">
+                    <input class="btn btn-info text-light" type="submit" value="登録" name="btn_entry">
                     <a class="ms-3 me-3 btn btn-warning text-light" href="{% url 'sheets-list' %}?ini_flg=False">戻る</a>
                 </div>
             </div>
-            {% include './sheet_detail.html' %}
+            {% include './sheet_detail1.html' %}
+            <div class="text-danger">
+                {% if sheet_form.non_field_errors %}
+                    {% for serror in sheet_form.non_field_errors %}
+                        {{ serror }}
+                    {% endfor %}
+                {% endif %}
+            </div>
         </form>
-        <div class="text-danger">
-            {% if form.non_field_errors %}
-                {% for error in form.non_field_errors %}
-                    {{ error }}
-                {% endfor %}
-            {% endif %}
-        </div>
+        <form method="POST" name="form_item" id="form_item">
+            {% csrf_token %}
+            <div>
+                <div>
+                    <input type="submit" value="追加" name="btn_add">
+                    <input type="submit" value="削除" name="btn_del">
+                </div>
+            </div>
+            {% include './sheet_detail2.html' %}
+            <div class="text-danger">
+                {% if sheet_form.non_field_errors %}
+                    {% for serror in sheet_form.non_field_errors %}
+                        {{ serror }}
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </form>
     </div>
 {% endblock %}

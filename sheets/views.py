@@ -3,7 +3,7 @@ from django.db.models import Q
 from django.views.generic import ListView, FormView
 from sureveys.models import Ujf
 from sheets.models import Sheets
-from sheets.forms import SheetQueryForm, SheetForm
+from sheets.forms import SheetQueryForm, SheetForm, ItemForm
 
 # 検索条件(セッション値）から（検索クエリを発行）該当リストを返す
 def makeSheetList(request):
@@ -99,6 +99,7 @@ class SheetsListView(LoginRequiredMixin, ListView):
 class SheetsCreateView(LoginRequiredMixin, FormView):
     template_name = 'sheets/sheet_new.html'
     form_class = SheetForm
+    form_class2 = ItemForm
     success_url = '/sheets?ini_flg=False'
 
     # formにパラメータを渡す為のオーバーライド
@@ -111,6 +112,16 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
         kwargs.update({'pnendo': pnendo, 'mod': mod})
 
         return kwargs
+
+    # ２個目のフォームを返す為のオーバーライド
+    def get_context_data(self, **kwargs):
+
+        # ２個目のフォームを渡す
+        context = FormView.get_context_data(self, **kwargs)
+        form2 = self.form_class2
+        context.update({'form2': form2})
+
+        return context
 
 '''
     def form_valid(self, form):
