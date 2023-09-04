@@ -1,13 +1,19 @@
 <!--カラム設定部-->
-<table class="qlayouttable">
+
+<table class="table-bordered mt-2">
     <tr>
-        <th>{{ form2.item_no.label_tag }}</th>
-        <td class="pe-3">{{ form2.item_no }}</td>
-        <th>{{ form2.content.label_tag }}</th>
-        <td class="pe-3">{{ form2.content }}</td>
-        <th>{{ form2.input_type.label_tag }}</th>
-        <td class="pe-3">{{ form2.input_type }}</td>
-        <th>{{ form2.ck_delete.label_tag }}</th>
-        <td>{{ form2.ck_delete }}</td>
+        <th class="bg-light">項目No.</th>
+        <th class="bg-light">内容</th>
+        <th class="bg-light">入力タイプ</th>
+        <th class="bg-light">削</th>
     </tr>
+    {% for form2 in formset  %}
+        <tr>
+            <td class="p-1 text-center">{{ form2.item_no }}</td>
+            <td class="p-1 text-center">{{ form2.content }}</td>
+            <td class="p-1 text-center">{{ form2.input_type }}</td>
+            <td class="p-1 text-center">{{ form2.ck_delete }}</td>
+        </tr>
+    {% endfor %}
+    {{ formset.management_form }}
 </table>

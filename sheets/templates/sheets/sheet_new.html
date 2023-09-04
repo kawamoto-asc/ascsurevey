@@ -34,6 +34,7 @@
                 </div>
             </div>
             {% include './sheet_detail2.html' %}
+            {{ form2.management_form }}
             <div class="text-danger">
                 {% if sheet_form.non_field_errors %}
                     {% for serror in sheet_form.non_field_errors %}
