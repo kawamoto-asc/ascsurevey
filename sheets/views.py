@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
-from django.views.generic import ListView, FormView
+from django.views.generic import ListView, FormView, CreateView
 from sureveys.models import Ujf
 from sheets.models import Sheets
 from sheets.forms import SheetQueryForm, SheetForm, ItemForm
@@ -105,15 +105,16 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
     form_class = SheetForm
     ItemFormSet = forms.formset_factory(
         form = ItemForm,
-        extra=1,
+        extra=3,
         max_num = 50,
     )
     form_class2 = ItemFormSet
-    success_url = '/sheets?ini_flg=False'
+    #success_url = '/sheets?ini_flg=False'
 
     # formにパラメータを渡す為のオーバーライド
     def get_form_kwargs(self, *args, **kwargs):
-        kwargs = super(SheetsCreateView, self).get_form_kwargs()
+        print('get_form_kwargs')
+        kwargs = super().get_form_kwargs()
 
         # パラメータ年度、編集モード(新規）をフォームへ渡す
         pnendo = self.kwargs['pnendo']
@@ -121,59 +122,37 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
         kwargs.update({'pnendo': pnendo, 'mod': mod})
 
         # FORM_VALUESが空でない場合（入力中のフォームがある場合）、dataキーにFORM_VALUESを設定
-        if FORM_VALUES:
+        if FORM_VALUES and 'btn_add' in FORM_VALUES:
             kwargs['data'] = FORM_VALUES
 
         return kwargs
 
     # ２個目のフォームを返す為のオーバーライド
     def get_context_data(self, **kwargs):
-
+        print('get_context_data')
         # ２個目のフォームを渡す
-        context = FormView.get_context_data(self, **kwargs)
-        formset = self.form_class2(self.request.GET or None)
-        context.update({'formset': formset})
+        context = super().get_context_data(**kwargs)
+        context.update({
+            #'form': self.form_class(self.request.GET or None),
+            'formset': self.form_class2(self.request.GET or None),
+            })
 
         return context
 
-'''
-    def form_valid(self, form):
-        data = form.cleaned_data
+    def post(self, request, *args, **kwargs):
+        print('post')
+        global FORM_NUM
+        global FORM_VALUES
 
-        # ユーザマスタに登録
-        cuser = CustomUser()
-        cuser.nendo = data['nendo']
-        cuser.user_id = data['user_id']
-        cuser.first_name = data['first_name']
-        cuser.last_name = data['last_name']
-        cuser.email = data['email']
-        cuser.is_staff = data['is_staff']
-        cuser.post_id = Post.objects.get(nendo=data['nendo'], post_code=data['post'])
-        cuser.busyo_id = Busyo.objects.get(nendo=data['nendo'], bu_code=data['busyo'])
-        cuser.location_id = Location.objects.get(nendo=data['nendo'], location_code=data['location'])
-        cuser.created_by = self.request.user.username
+        # 追加ボタン押下なら
+        if 'btn_add' in request.POST:
+            FORM_NUM += 1   # フォーム数インクリメント
+            FORM_VALUES = request.POST.copy()   # リクエストの内容コピー
+            FORM_VALUES['form-TOTAL_FORMS'] = FORM_NUM
 
-        cuser.save()
+            formset = self.form_class2(request.POST)
+            print(formset.total_form_count)
+            #formset.total_form_count = FORM_NUM これはダメ。。。
+            print(formset.total_form_count)
 
-        # ログインマスタに登録があれば更新、なければ登録
-        if User.objects.filter(username=cuser.user_id).exists():
-            auser = User.objects.get(username=cuser.user_id)
-            auser.first_name = cuser.first_name
-            auser.last_name = cuser.last_name
-            auser.email = cuser.email
-            auser.is_staff = cuser.is_staff
-            auser.save()
-        else:
-            new_user = User()
-            new_user.username = cuser.user_id
-            new_user.password = make_password(cuser.user_id)
-            new_user.first_name = cuser.first_name
-            new_user.last_name = cuser.last_name
-            new_user.email = cuser.email
-            new_user.is_staff = cuser.is_staff
-            new_user.is_active = True
-            new_user.is_superuser = False
-            new_user.save()
-
-        return super().form_valid(form)
-'''
+        return super().post(request, args, kwargs)

@@ -1,6 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from sheets.consts import INPUT_TYPE_CHOICES
+import re
 
 # シートマスタメンテナンス 検索フォーム
 class SheetQueryForm(forms.Form):
@@ -26,16 +27,17 @@ class SheetForm(forms.Form):
         self.sobj = kwargs.pop('sobj', None)
         super().__init__(*args, **kwargs)
 
+        # 年度はパラメータ値でリードオンリー
         nendo = self.pnendo
         self.fields['nendo'].initial = nendo
+        self.fields['nendo'].widget.attrs['readonly'] = 'readonly'
 
-
-'''
         # 編集モードの場合
         if self.mod == 'edit':
-            # ユーザIDもリードオンリー
-            self.fields['user_id'].widget.attrs['readonly'] = 'readonly'
+            # シート名もリードオンリー
+            self.fields['sheet_name'].widget.attrs['readonly'] = 'readonly'
 
+        '''
             uobj = self.uobj
             # ユーザ情報初期化
             self.fields['busyo'].initial = uobj.busyo_id.bu_code
@@ -46,33 +48,8 @@ class SheetForm(forms.Form):
             self.fields['first_name'].initial = uobj.first_name
             self.fields['email'].initial = uobj.email
             self.fields['is_staff'].initial = uobj.is_staff
-
-    def clean(self):
-        # 半角英数字と_@-.だけ入力可のチェック用
-        reg = re.compile(r'^[A-Za-z0-9_@\-\.]+$')
-
-        # 新規登録時だけのチェック
-        if self.mod == 'new':
-            nendo = self.cleaned_data['nendo']
-            uid = self.cleaned_data['user_id']
-
-            if reg.match(uid) is None:
-                raise ValidationError('ユーザーIDは半角英数字か_-@で入力してください。')
-
-            user = CustomUser.objects.filter(
-                nendo = nendo,
-                user_id = uid,
-            ).exists()
-            if user:
-                raise ValidationError('入力した年度のユーザIDは既に登録済みです。')
-        
-        # 新規、編集共通チェック
-        email = self.cleaned_data['email']
-        if email:
-            if reg.match(email) is None:
-                raise ValidationError('メールアドレスは半角英数字か_-@で入力してください。')
-'''
-                
+        '''
+            
 # カラムマスタ 登録・編集フォーム
 class ItemForm(forms.Form):
     item_no = forms.IntegerField(
@@ -81,7 +58,11 @@ class ItemForm(forms.Form):
     )
     content = forms.CharField(
         label='内容', required=True,
-        widget=forms.Textarea(attrs={'cols': 50, 'rows': 3,})
+        widget=forms.Textarea(attrs={
+            'cols': 50,
+             'rows': 3,
+             'placeholder': '300文字',
+            })
     )
     input_type = forms.ChoiceField(label='入力タイプ', choices=INPUT_TYPE_CHOICES,required=True,)
     ck_delete = forms.BooleanField(
