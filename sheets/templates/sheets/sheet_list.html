@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block main %}
+    <div>
+        <nav aria-label="breadcrumb" role="navigation">
+            <ol class="breadcrumb pt-3">
+                <li class="fs-5 breadcrumb-item active" aria-current="page">シートマスタメンテナンス</li>
+            </ol>
+        </nav>
+        <form method="POST">
+            {% csrf_token %}
+            <table>
+                <tr>
+                    {% for field in query_form %}
+                        <th class="pe-1">{{ field.label }}</th>
+                        <td class="pe-3">{{ field }}</td>
+                    {% endfor %}
+                    <td class="ps-3">
+                        <input class="btn btn-primary" type="submit" value="検索">
+                    </td>
+                </tr>
+            </table>
+        </form>
+
+        <section class="post-list">
+            {% if not ini_flg %}
+                <div class="mb-1">
+                    <a class="btn btn-warning text-light" href="{% url 'sheet-new' request.session.form_value.0 %}">新規作成</a>
+                    <!-- 編集画面へ移動の予定 <a class="ms-3 btn btn-success opacity-75" href="#">Excel出力</a>-->
+                    <a class="ms-3 btn btn-success opacity-75" href="#">Excel入力</a>
+                </div>
+                {% if object_list|length == 0 %}
+                    <p>検索結果が存在しません。</p>
+                {% else %}
+                <div class="table-responsive" id="result-div">
+                    <table class="table table-bordered">
+                        <thead class="sticky-top table-light">
+                            <tr>
+                                <th>{{ sdat.nendo.label_tag }}</th>
+                                <th>{{ sdat.sheet_name.label_tag }}</th>
+                                <th>{{ sdat.title.label_tag }}</th>
+                                <th>{{ sdat.created_by.label_tag }}</th>
+                                <th>{{ sdat.created_at.label_tag }}</th>
+                                <th>{{ sdat.update_by.label_tag }}</th>
+                                <th>{{ sdat.updated_at.label_tag }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for sdat in object_list %}
+                            <tr>
+                                <td>{{ sdat.nendo }}</td>
+                                <td><a href="{% url 'sheet-edit' request.session.form_value.0 sdat.id %}">{{ sdat.sheet_name }}</a></td>
+                                <td>{{ sdat.title }}</td>
+                                <td>{{ sdat.created_by|default_if_none:"" }}</td>
+                                <td>{{ sdat.created_at|default_if_none:""|date:"Y/m/d H:i" }}</td>
+                                <td>{{ sdat.update_by|default_if_none:"" }}</td>
+                                <td>{{ sdat.updated_at|default_if_none:""|date:"Y/m/d H:i" }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        {% endif %}
+    </section>
+    </div>
+
+{% endblock %}            

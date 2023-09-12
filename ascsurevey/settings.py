@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'sureveys.apps.SureveysConfig',
     'customuser.apps.CustomuserConfig',
+    'sheets.apps.SheetsConfig',
 ]
 
 MIDDLEWARE = [

@@ -20,3 +20,9 @@ nav {
     border-top: solid 1px ghostwhite;
     opacity: 0.3;
 }
+
+/* NumberInputの幅 NumberInputはwidgetのattrs sizeが効かなかったのでここで定義 */
+.ShortNumberInput {
+    width: 60px;
+    text-align: right;
+}

@@ -31,7 +31,7 @@ class Menu(models.Model):
     updated_at = models.DateTimeField('更新日', auto_now=True)
 
     def __str__(self) -> str:
-        return super().__str__()
+        return self.title
     
 # 運用条件
 class Ujf(models.Model):

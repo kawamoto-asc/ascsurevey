@@ -24,6 +24,7 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('ascsurevey/', include('sureveys.urls')),
     path('customusers/', include('customuser.urls')),
+    path('sheets/', include('sheets.urls')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
