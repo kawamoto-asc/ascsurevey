@@ -512,7 +512,7 @@ class FileUploadView(LoginRequiredMixin, FormView):
             splist = lkey.split('_')
             nendo = splist[0]
             code = splist[1]
-            name = budic[lkey]
+            name = lodic[lkey]
             # 勤務地マスタにあれば更新、なければ登録
             if Location.objects.filter(nendo=nendo, location_code=code).exists():
                 locdat = Location.objects.get(nendo=nendo, location_code=code)
