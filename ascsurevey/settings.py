@@ -10,7 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
-#import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,7 +25,7 @@ SECRET_KEY = 'django-insecure-0!8ffvxji2(x%xy2ere8u=5t!_3oy_0!(rh0%t@k%%_xvh^sl^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost','192.168.8.240']
 
 
 # Application definition
@@ -38,11 +37,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'accounts.apps.AccountsConfig',
-    'sureveys.apps.SureveysConfig',
     'django_bootstrap5',
     'django_bootstrap_icons',
     'import_export',
+    'accounts.apps.AccountsConfig',
+    'sureveys.apps.SureveysConfig',
+    'customuser.apps.CustomuserConfig',
+    'sheets.apps.SheetsConfig',
 ]
 
 MIDDLEWARE = [
@@ -69,6 +70,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'sureveys.context_processors.global_menu_data',
+                'sureveys.context_processors.global_ujf',
             ],
         },
     },
@@ -137,8 +139,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ログイン・ログアウト時 リダイレクト先
 LOGIN_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/ascsurevey/'
+LOGOUT_REDIRECT_URL = '/ascsurevey/'
 
 # SQLチェックの為のログ設定 本番時は削除
 '''
@@ -159,3 +161,12 @@ LOGGING = {
     }
 }
 '''
+
+# メディア設定
+import os
+
+MEDIA_URL = '/media/'
+if DEBUG:
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+else:
+    MEDIA_ROOT = f'/var/www/{BASE_DIR.name}/media'

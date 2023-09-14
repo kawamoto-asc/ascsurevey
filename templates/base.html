@@ -1,25 +1,26 @@
 {% load static %}
 {% load django_bootstrap5 %}
-{% load bootstrap_icons %}
 <html>
 <head>
     <meta charset="utf-8">
     <title>ASC 社内汎用アンケートシステム</title>
     {% bootstrap_css %}
     {% bootstrap_javascript %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'customuser/css/customuser.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'bootstrap-icons-1.10.5/font/bootstrap-icons.css' %}">
     <script src="{% static 'js/common.js' %}"></script>
     {% block extraheader %}{% endblock %}
 </head>
 <body class="h-100">
     <header class="w-100 d-flex flex-row justify-content-between">
         <div class="fs-5 ps-3"><strong>ASC 社内汎用アンケートシステム</strong></div>
-        <div class="text-dark pe-3 pt-1">{{ request.user.first_name }}&nbsp;{{ request.user.last_name }}</div>
+        <div class="text-dark pe-3 pt-1">{{ request.user.last_name }}&nbsp;{{ request.user.first_name }}</div>
     </header>
     <div class="d-flex flex-row" style="height: calc(100% - 30px)">
         <nav class="bg-primary bg-opacity-75" id="sideMenu">
             <ul class="nav flex-column m-0 p-3">
-                <li class="nav-item"><a href="/" class="nav-link">ＨＯＭＥ</a></li>
+                <li class="nav-item"><a href="/ascsurevey" class="nav-link">ＨＯＭＥ</a></li>
                 <li class="nav-item text-light menu_hr"></li>
                 <!--スタッフ権限があるユーザの場合-->
                 {% if request.user.is_staff %}
@@ -33,6 +34,7 @@
                         <li class="nav-item"><a href="{{ tmenu_dat.url }}" class="nav-link">{{ tmenu_dat.title }}</a></li>
                     {% endfor %}
                     <li class="nav-item text-white menu_hr"></li>
+                    <li class="nav-item"><a href="/sheets/" class="nav-link">シートマスタメンテナンス</a></li>
                     {% for amenu_dat in amenu %}
                         <li class="nav-item"><a href="{{ amenu_dat.url }}" class="nav-link">{{ amenu_dat.title }}</a></li>
                     {% endfor %}
@@ -52,13 +54,17 @@
                         {% endif %}
                     {% endfor %}
                 {% endif %}
+                <!--スーパーユーザ権限がある場合-->
+                {% if request.user.is_superuser %}
+                    <li class="nav-item"><a href="/customusers/" class="nav-link">ユーザーマスタメンテナンス</a></li>
+                {% endif %}
             </ul>
         </nav>
         <div class="w-100">
             <div class="border shadow-sm d-flex flex-row bg-primary bg-opacity-10 justify-content-between">
                 <div class="d-flex flex-row align-items-center">
                     <div class="navbar-brand toggle-menu">
-                        <button class="btn" id="toggle">{% bs_icon 'justify' size='1.5em' %}</button>
+                        <button class="btn bi bi-justify" id="toggle" style="font-size:1.5em"></button>
                     </div>
                     <div class="fs-5">Dashboard</div>
                 </div>
@@ -75,8 +81,6 @@
     </div>
 </body>
 <script type="text/javascript">
-    window.onload = () => {
-        menuControl();
-    }
+    menuControl();
 </script>
 </html>

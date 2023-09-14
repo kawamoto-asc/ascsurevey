@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block main %}
+    <div>
+        <nav aria-label="breadcrumb" style="width:100%;">
+            <ol class="breadcrumb pt-3 fs-5">
+                <li class="breadcrumb-item"><a href="{% url 'cusers-list' %}">シートマスタメンテナンス</a></li>
+                <li class="breadcrumb-item active" aria-current="page">新規登録</li>
+            </ol>
+        </nav>
+        <form method="POST" name="form_sheet" id="form_sheet">
+            {% csrf_token %}
+            <div class="d-flex justify-content-end">
+                <div>
+                    <input class="btn btn-info text-light" type="submit" value="登録" name="btn_entry">
+                    <a class="ms-3 me-3 btn btn-warning text-light" href="{% url 'sheets-list' %}?ini_flg=False">戻る</a>
+                </div>
+            </div>
+            {% include './sheet_detail1.html' %}
+            <div class="text-danger">
+                {% if form.non_field_errors %}
+                    {% for serror in form.non_field_errors %}
+                        {{ serror }}
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </form>
+        <form method="POST" name="form_item" id="form_item">
+            {% csrf_token %}
+            <div>
+                <div>
+                    <input type="submit" value="追加" name="btn_add">
+                    <input type="submit" value="削除" name="btn_del">
+                </div>
+            </div>
+            {% include './sheet_detail2.html' %}
+            <div class="text-danger">
+                {% if form2.non_field_errors %}
+                    {% for serror in form2.non_field_errors %}
+                        {{ serror }}
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </form>
+    </div>
+{% endblock %}

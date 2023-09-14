@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block main %}
+    <div>
+        <nav aria-label="breadcrumb" role="navigation">
+            <ol class="breadcrumb pt-3">
+                <li class="fs-5 breadcrumb-item active" aria-current="page">ユーザーマスタメンテナンス</li>
+            </ol>
+        </nav>
+        <form method="POST">
+            {% csrf_token %}
+            <table>
+                <tr>
+                    {% for field in query_form %}
+                        <th class="pe-1">{{ field.label }}</th>
+                        <td class="pe-3">{{ field }}</td>
+                    {% endfor %}
+                    <td class="ps-3">
+                        <input class="btn btn-primary" type="submit" value="検索">
+                    </td>
+                </tr>
+            </table>
+        </form>
+
+        <section class="post-list">
+            {% if not ini_flg %}
+                <div class="mb-1">
+                    <a class="btn btn-warning text-light" href="{% url 'cusers-new' request.session.form_value.0 %}">新規作成</a>
+                    <a class="ms-3 btn btn-success opacity-75" href="{% url 'cuser-download' %}">Excel出力</a>
+                    <a class="ms-1 btn btn-success opacity-75" href="{% url 'cuser-upload' %}">Excel入力</a>
+                </div>
+                {% if object_list|length == 0 %}
+                    <p>検索結果が存在しません。</p>
+                {% else %}
+                    <div class="table-responsive" id="result-div">
+                        <table class="table table-bordered">
+                            <thead class="sticky-top table-light">
+                                <tr>
+                                    <th>年度</th>
+                                    <th>部署名</th>
+                                    <th>勤務地</th>
+                                    <th>役職</th>
+                                    <th>ユーザID</th>
+                                    <th>氏 名</th>
+                                    <th>メールアドレス</th>
+                                    <th>管理者権限</th>
+                                    <th>登録者</th>
+                                    <th>登録日</th>
+                                    <th>更新者</th>
+                                    <th>更新日</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for udat in object_list %}
+                                <tr>
+                                    <td>{{ udat.nendo }}</td>
+                                    <td>{{ udat.busyo_id.bu_name }}</td>
+                                    <td>{{ udat.location_id.location_name }}</td>
+                                    <td>{{ udat.post_id.post_name }}</td>
+                                    <td><a href="{% url 'cusers-edit' request.session.form_value.0 udat.id %}">{{ udat.user_id }}</a></td>
+                                    <td>{{ udat.last_name|add:" "|add:udat.first_name }}</td>
+                                    <td>{{ udat.email|default_if_none:"" }}</td>
+                                    {% if udat.is_staff %}
+                                        <td class="text-center bi bi-check-circle-fill" style="color:green"></td>
+                                    {% else %}
+                                        <td class="text-center bi bi-x-circle-fill" style="color:red"></td>
+                                    {% endif %}
+                                    <td>{{ udat.created_by|default_if_none:"" }}</td>
+                                    <td>{{ udat.created_at|default_if_none:""|date:"Y/m/d H:i" }}</td>
+                                    <td>{{ udat.update_by|default_if_none:"" }}</td>
+                                    <td>{{ udat.updated_at|default_if_none:""|date:"Y/m/d H:i" }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </section>
+    </div>
+
+    <script>
+        let p = document.querySelector('#id_nendo');
+
+        p.onchange = function() {
+            let pnendo = p.selectedOptions[0].value;
+            // 部署リスト更新
+            renewSelectList(pnendo, '/customusers/get-busyolist', '#id_busyo');
+            // 勤務地リスト更新
+            renewSelectList(pnendo, '/customusers/get-locationlist', '#id_location');
+            // 役職リスト更新
+            renewSelectList(pnendo, '/customusers/get-postlist', '#id_post');
+        }
+
+        // テーブルのヘッダ固定用divの高さ設定
+        let pdiv = document.querySelector('#result-div');
+        if(pdiv) {
+            let ht = document.documentElement.clientHeight - 250;
+            pdiv.style.height = ht;
+        }
+    </script>
+{% endblock %}

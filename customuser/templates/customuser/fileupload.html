@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block main %}
+    <div>
+        <nav aria-label="breadcrumb" style="width:100%;">
+            <ol class="breadcrumb pt-3 fs-5">
+                <li class="breadcrumb-item"><a href="{% url 'cusers-list' %}">ユーザーマスタメンテナンス</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Excel入力</li>
+            </ol>
+        </nav>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <table>
+                <tr>
+                    <td>{{ form.file }}</td>
+                    <td><button class="ms-3 btn btn-info text-light" type="submit"
+                            onclick="document.querySelector('#loading').classList.remove('d-none')">実行</button></td>
+                    <td class="ps-3">
+                        <a class="ms-1 btn btn-warning text-light" href="{% url 'cusers-list' %}?ini_flg=False">戻る</a>
+                    </td>
+                </tr>
+            </table>
+        </form>
+
+        <div>
+            <table>
+                {% for error in form.file.errors %}
+                    <tr><td class="text-danger">{{ error }}</td></tr>
+            {% endfor %}
+            {% if form.non_field_errors %}
+                {% for error in form.non_field_errors %}
+                    <tr><td class="text-danger">{{ error }}</td></tr>
+                {% endfor %}
+            {% endif %}
+            </table>
+        </div>
+
+        <div id="loading" class="position-absolute top-0 start-0 w-100 h-100 d-none">
+            <div class="text-center position-absolute top-50 start-50 w-100 translate-middle">
+                <div class="spinner-border text-info" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="pt-2 ps-3">処理中です。。。</div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block main %}
+    <div>
+        <nav aria-label="breadcrumb" style="width:100%;">
+            <ol class="breadcrumb pt-3 fs-5">
+                <li class="breadcrumb-item"><a href="{% url 'cusers-list' %}">ユーザーマスタメンテナンス</a></li>
+                <li class="breadcrumb-item active" aria-current="page">編集・削除</li>
+            </ol>
+        </nav>
+        <form method="POST">
+            {% csrf_token %}
+            <table id="entry-form">
+                <tr>
+                    <td colspan="3" class="text-end">
+                        <input class="ms-3 btn btn-info text-light"
+                            type="submit" name="btn_update" value="更新" onclick="return confirm('更新しますか？')">
+                    </td>
+                    <td colspan="3" class="text-end">
+                        <input class="ms-3 btn btn-danger opacity-75 text-light"
+                            type="submit" name="btn_delete" value="削除" onclick="return confirm('削除しますか？')">
+                    </td>
+                    <td class="ps-3">
+                        <a class="ms-1 btn btn-warning text-light" href="{% url 'cusers-list' %}?ini_flg=False">戻る</a>
+                    </td>
+                </tr>
+                {% include './customuser_detail.html' %}
+            </table>
+        </form>
+        <div class="text-danger">
+            {% if form.non_field_errors %}
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
