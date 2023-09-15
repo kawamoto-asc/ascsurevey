@@ -105,7 +105,7 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
     form_class = SheetForm
     ItemFormSet = forms.formset_factory(
         form = ItemForm,
-        extra=3,
+        extra=1,
         max_num = 50,
     )
     form_class2 = ItemFormSet
@@ -122,12 +122,14 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
         kwargs.update({'pnendo': pnendo, 'mod': mod})
 
         # FORM_VALUESが空でない場合（入力中のフォームがある場合）、dataキーにFORM_VALUESを設定
-        if FORM_VALUES and 'btn_add' in FORM_VALUES:
+        if FORM_VALUES:
             kwargs['data'] = FORM_VALUES
+            print(FORM_VALUES)
 
         return kwargs
 
     # ２個目のフォームを返す為のオーバーライド
+    '''
     def get_context_data(self, **kwargs):
         print('get_context_data')
         # ２個目のフォームを渡す
@@ -137,7 +139,7 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
             'formset': self.form_class2(self.request.GET or None),
             })
 
-        return context
+        return context'''
 
     def post(self, request, *args, **kwargs):
         print('post')
@@ -148,11 +150,8 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
         if 'btn_add' in request.POST:
             FORM_NUM += 1   # フォーム数インクリメント
             FORM_VALUES = request.POST.copy()   # リクエストの内容コピー
+            print(FORM_VALUES)
             FORM_VALUES['form-TOTAL_FORMS'] = FORM_NUM
-
-            formset = self.form_class2(request.POST)
-            print(formset.total_form_count)
-            #formset.total_form_count = FORM_NUM これはダメ。。。
-            print(formset.total_form_count)
+            print(FORM_VALUES)
 
         return super().post(request, args, kwargs)
