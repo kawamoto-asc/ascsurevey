@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.utils import timezone
-from sureveys.models import Information
+from surveys.models import Information
 
 # トップ画面
 @login_required
@@ -14,4 +14,4 @@ def top(request):
 
     context = {"informations": informations,
                "dsp_new_day": dsp_new_day}
-    return render(request, "sureveys/top.html", context)
+    return render(request, "surveys/top.html", context)

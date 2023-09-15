@@ -1,5 +1,5 @@
 """
-WSGI config for ascsurevey project.
+WSGI config for ascsurvey project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
