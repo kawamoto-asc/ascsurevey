@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from sureveys.models import Busyo, Location, Post, CustomUser
+from surveys.models import Busyo, Location, Post, CustomUser
 import re
 
 # ユーザーマスタメンテナンス 検索フォーム

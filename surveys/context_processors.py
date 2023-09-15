@@ -1,4 +1,4 @@
-from sureveys.models import Menu, Ujf
+from surveys.models import Menu, Ujf
 
 # メニュー情報
 def global_menu_data(request):

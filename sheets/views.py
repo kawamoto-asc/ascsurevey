@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.views.generic import ListView, FormView, CreateView
-from sureveys.models import Ujf
+from surveys.models import Ujf
 from sheets.models import Sheets
 from sheets.forms import SheetQueryForm, SheetForm, ItemForm
 

@@ -6,7 +6,7 @@ from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.views.generic import ListView, FormView
 from customuser.forms import CustomUserQueryForm, CustomUserForm, FileUploadForm
-from sureveys.models import Ujf, Busyo, Location, Post, CustomUser
+from surveys.models import Ujf, Busyo, Location, Post, CustomUser
 from pytz import timezone
 import unicodedata
 import openpyxl
