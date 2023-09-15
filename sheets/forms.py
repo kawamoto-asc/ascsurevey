@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from sheets.consts import INPUT_TYPE_CHOICES
+from sheets.consts import INPUT_TYPE_CHOICES, FIELD_TYPE_CHOICES
 import re
 
 # シートマスタメンテナンス 検索フォーム
@@ -64,7 +64,7 @@ class ItemForm(forms.Form):
              'placeholder': '300文字',
             })
     )
-    input_type = forms.ChoiceField(label='入力タイプ', choices=INPUT_TYPE_CHOICES,required=True,)
+    input_type = forms.ChoiceField(label='入力タイプ', choices=FIELD_TYPE_CHOICES,required=True,)
     ck_delete = forms.BooleanField(
         label='削除',
         widget=forms.CheckboxInput(attrs={'class': 'check'}),
