@@ -28,7 +28,7 @@ class Sheets(models.Model):
         return self.sheet_name
 
     class Meta:
-        db_table = 'sureveys_sheet'
+        db_table = 'surveys_sheet'
 
 # 項目マスタ
 class Items(models.Model):
@@ -57,4 +57,4 @@ class Items(models.Model):
         return str(self.nendo) + '_' + self.sheet_id + '_' + str(self.item_no)
 
     class Meta:
-        db_table = 'sureveys_item'
+        db_table = 'surveys_item'

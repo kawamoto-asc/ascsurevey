@@ -4,7 +4,7 @@ from import_export.admin import ImportExportMixin
 from import_export.fields import Field
 from import_export.formats import base_formats
 from pytz import timezone
-from sureveys.models import Information, Menu, Ujf, Post, Busyo, Location, CustomUser
+from surveys.models import Information, Menu, Ujf, Post, Busyo, Location, CustomUser
 
 # 管理画面でのメンテクラス
 # Informationメンテナンス画面
