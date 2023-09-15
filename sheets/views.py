@@ -113,7 +113,6 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
 
     # formにパラメータを渡す為のオーバーライド
     def get_form_kwargs(self, *args, **kwargs):
-        print('get_form_kwargs')
         kwargs = super().get_form_kwargs()
 
         # パラメータ年度、編集モード(新規）をフォームへ渡す
@@ -121,28 +120,28 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
         mod = "new"
         kwargs.update({'pnendo': pnendo, 'mod': mod})
 
-        # FORM_VALUESが空でない場合（入力中のフォームがある場合）、dataキーにFORM_VALUESを設定
-        if FORM_VALUES:
-            kwargs['data'] = FORM_VALUES
-            print(FORM_VALUES)
-
         return kwargs
 
     # ２個目のフォームを返す為のオーバーライド
-    '''
     def get_context_data(self, **kwargs):
-        print('get_context_data')
+
         # ２個目のフォームを渡す
         context = super().get_context_data(**kwargs)
-        context.update({
-            #'form': self.form_class(self.request.GET or None),
-            'formset': self.form_class2(self.request.GET or None),
-            })
 
-        return context'''
+        # フォームデータがあれば
+        if FORM_VALUES:
+            context.update({
+                'formset': self.form_class2(FORM_VALUES),
+                })
+        # なければ 新規にformset作成
+        else:
+            context.update({
+                'formset': self.form_class2(self.request.GET or None),
+                })
+
+        return context
 
     def post(self, request, *args, **kwargs):
-        print('post')
         global FORM_NUM
         global FORM_VALUES
 
@@ -150,8 +149,6 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
         if 'btn_add' in request.POST:
             FORM_NUM += 1   # フォーム数インクリメント
             FORM_VALUES = request.POST.copy()   # リクエストの内容コピー
-            print(FORM_VALUES)
             FORM_VALUES['form-TOTAL_FORMS'] = FORM_NUM
-            print(FORM_VALUES)
 
         return super().post(request, args, kwargs)
