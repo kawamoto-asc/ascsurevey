@@ -1,13 +1,15 @@
 from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
+from django.urls import reverse_lazy
 from django.views.generic import ListView, FormView, CreateView
 from surveys.models import Ujf
 from sheets.models import Sheets
 from sheets.forms import SheetQueryForm, SheetForm, ItemForm
 
 FORM_NUM = 1        # フォーム数
-FORM_VALUES = {}    # 前回のPSOT値
+FORM_VALUES = {}    # 前回のform_setのPSOT値
+SHEET_VALUES = {}   # シート情報
 
 # 検索条件(セッション値）から（検索クエリを発行）該当リストを返す
 def makeSheetList(request):
@@ -109,7 +111,19 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
         max_num = 50,
     )
     form_class2 = ItemFormSet
-    #success_url = '/sheets?ini_flg=False'
+
+    # 一覧、シート（Session）情報をクリアするフラグ
+    ini_flg = True
+
+    # success_urlは動的にパラメータを渡さないといけないのでオーバーライド
+    def get_success_url(self):
+        url = reverse_lazy(
+            'sheet-new',
+             kwargs={'pnendo': self.kwargs['pnendo'],
+                     'pflg': 'False',
+                     }
+            )
+        return url
 
     # formにパラメータを渡す為のオーバーライド
     def get_form_kwargs(self, *args, **kwargs):
@@ -124,6 +138,21 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
 
     # ２個目のフォームを返す為のオーバーライド
     def get_context_data(self, **kwargs):
+        global FORM_NUM
+        global FORM_VALUES
+        global SHEET_VALUES
+
+        # 初期化フラグをパラメータから更新
+        if self.kwargs['pflg'] == 'False':
+            self.ini_flg = False
+        else:
+            self.ini_flg = True
+
+        # 初期化フラグからformset,formデータを削除
+        if self.ini_flg:
+            FORM_NUM = 1
+            FORM_VALUES = {}
+            SHEET_VALUES = {}
 
         # ２個目のフォームを渡す
         context = super().get_context_data(**kwargs)
@@ -131,6 +160,7 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
         # フォームデータがあれば
         if FORM_VALUES:
             context.update({
+                'form': self.form_class(SHEET_VALUES),
                 'formset': self.form_class2(FORM_VALUES),
                 })
         # なければ 新規にformset作成
@@ -144,11 +174,28 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
     def post(self, request, *args, **kwargs):
         global FORM_NUM
         global FORM_VALUES
+        global SHEET_VALUES
+
+        # 一度Submitしたので、初期化フラグをOFF
+        self.ini_flg = False
+
+        # シートデータ項目データ表示用保存
+        fsetwork = request.POST.copy()
+        fsetdic = {}
+        shtdic = {}
+        for key, val in fsetwork.items():
+            if key.startswith('form-'):
+                fsetdic[key] = val
+            else:
+                shtdic[key] = val
+        # 別フォームなので、シート情報と項目情報を分けて保持
+        FORM_VALUES = fsetdic
+        SHEET_VALUES = shtdic
 
         # 追加ボタン押下なら
+        print('before')
         if 'btn_add' in request.POST:
-            FORM_NUM += 1   # フォーム数インクリメント
-            FORM_VALUES = request.POST.copy()   # リクエストの内容コピー
+            FORM_NUM += 1   # formsetのフォーム数インクリメント
             FORM_VALUES['form-TOTAL_FORMS'] = FORM_NUM
 
         return super().post(request, args, kwargs)
