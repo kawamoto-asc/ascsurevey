@@ -27,7 +27,7 @@
             <div>
                 <div>
                     <input type="submit" value="追加" name="btn_add">
-                    <input type="submit" value="削除" name="btn_del">
+                    <input type="submit" value="削除" name="btn_del" onclick="return confirm('チェック行を削除しますか？')">
                 </div>
             </div>
             {% include './sheet_detail2.html' %}
