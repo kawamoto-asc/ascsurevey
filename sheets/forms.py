@@ -12,11 +12,11 @@ class SheetForm(forms.Form):
     nendo = forms.CharField(label='年度',
         widget=forms.TextInput(attrs={'readonly': 'readonly', 'size': '3'}),
         )
-    sheet_name = forms.CharField(label='シート名', required=True,)
-    title = forms.CharField(label='アンケート名', required=True,)
-    input_type = forms.ChoiceField(label='入力形式', choices=INPUT_TYPE_CHOICES, required=True,)
+    sheet_name = forms.CharField(label='シート名', required=False,)
+    title = forms.CharField(label='アンケート名', required=False,)
+    input_type = forms.ChoiceField(label='入力形式', choices=INPUT_TYPE_CHOICES, required=False,)
     dsp_no = forms.IntegerField(
-        label='表示順', required=True,
+        label='表示順', required=False,
         widget=forms.NumberInput(attrs={'class': 'ShortNumberInput'}),
     )
 
