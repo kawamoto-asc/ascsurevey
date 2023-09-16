@@ -193,9 +193,36 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
         SHEET_VALUES = shtdic
 
         # 追加ボタン押下なら
-        print('before')
         if 'btn_add' in request.POST:
             FORM_NUM += 1   # formsetのフォーム数インクリメント
+            FORM_VALUES['form-TOTAL_FORMS'] = FORM_NUM
+
+        # 削除ボタン押下なら
+        if 'btn_del' in request.POST:
+            #cnt_frm = 0
+            to_cnt = 0
+            del_cnt = 0
+            newdic = {}
+            delkeyist = []
+            # FORM_VALUES form Noを削除行をのけて作り直し
+            for i in range(FORM_NUM):
+                frm_ck_delete = 'form-' + str(i) + '-ck_delete'
+                # チェックされていなければ
+                if frm_ck_delete not in FORM_VALUES:
+                    to_itemno_str = 'form-' + str(to_cnt) + '-item_no'
+                    newdic[to_itemno_str] = FORM_VALUES[frm_ck_delete.replace('ck_delete', 'item_no')]
+                    newdic[to_itemno_str.replace('item_no', 'content')] = FORM_VALUES[frm_ck_delete.replace('ck_delete', 'content')]
+                    newdic[to_itemno_str.replace('item_no', 'input_type')] = FORM_VALUES[frm_ck_delete.replace('ck_delete', 'input_type')]
+                    to_cnt += 1
+                else :
+                    delkeyist.append(frm_ck_delete)
+                    del_cnt += 1
+            # 項目No.での並べ変えは登録ボタン押下で正常登録後に実装
+            for key, val in newdic.items():
+                FORM_VALUES[key] = val
+            for keystr in delkeyist:
+                del FORM_VALUES[keystr]
+            FORM_NUM -= del_cnt
             FORM_VALUES['form-TOTAL_FORMS'] = FORM_NUM
 
         return super().post(request, args, kwargs)
