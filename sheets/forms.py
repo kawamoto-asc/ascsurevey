@@ -8,6 +8,7 @@ class SheetQueryForm(forms.Form):
     nendo = forms.ChoiceField(label='年度', required=True, disabled=False,)
 
 # シートマスタ 登録・編集フォーム
+# 追加ボタン押下時にエラーにしないようrequiredはFalse
 class SheetForm(forms.Form):
     nendo = forms.CharField(label='年度',
         widget=forms.TextInput(attrs={'readonly': 'readonly', 'size': '3'}),
@@ -51,6 +52,7 @@ class SheetForm(forms.Form):
         '''
             
 # カラムマスタ 登録・編集フォーム
+# 追加ボタン押下時にエラーにしないようrequiredはFalse
 class ItemForm(forms.Form):
     item_no = forms.IntegerField(
         label='項目No.', required=True,
