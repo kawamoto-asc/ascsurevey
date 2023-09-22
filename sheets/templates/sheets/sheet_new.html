@@ -20,7 +20,7 @@
             <div class="text-danger">
                 {% if form.non_field_errors %}
                     {% for serror in form.non_field_errors %}
-                        {{ serror }}
+                        {{ serror }}<br />
                     {% endfor %}
                 {% endif %}
             </div>
@@ -31,13 +31,6 @@
                 </div>
             </div>
             {% include './sheet_detail2.html' %}
-            <div class="text-danger">
-                {% if form2.non_field_errors %}
-                    {% for serror in form2.non_field_errors %}
-                        {{ serror }}
-                    {% endfor %}
-                {% endif %}
-            </div>
         </form>
     </div>
 {% endblock %}
