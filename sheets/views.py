@@ -159,10 +159,16 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
 
         # フォームデータがあれば
         if FORM_VALUES:
-            context.update({
-                'form': self.form_class(SHEET_VALUES),
-                'formset': self.form_class2(FORM_VALUES),
-                })
+            if self.request.method == 'GET':
+                context.update({
+                    'form': self.form_class(SHEET_VALUES),
+                    'formset': self.form_class2(FORM_VALUES),
+                    })
+            else:
+                context.update({
+                    'formset': self.form_class2(FORM_VALUES),
+                    })
+
         # なければ 新規にformset作成
         else:
             context.update({
@@ -227,8 +233,6 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
 
         # 登録ボタン押下なら
         if 'btn_entry' in request.POST:
-            #sheetform = self.form_class(request.POST)
-            #itemform = self.form_class2(request.POST)
             form = self.form_class(request.POST)
 
             # シート部分のエラーチェック
@@ -239,10 +243,9 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
             # エラーは全部シート部分に出力
             for i in range(FORM_NUM):
                 if not fsetwork['form-' + str(i) + '-item_no']:
-                    form.add_error(None, '項目Noの入力がありません(' + str(i) + '行目)')
+                    form.add_error(None, '項目Noの入力がありません(' + str(i + 1) + '行目)')
 
             if form.non_field_errors():
-                print(form.non_field_errors())
                 return self.form_invalid(form)
 
         return super().post(request, args, kwargs)
