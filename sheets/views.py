@@ -246,7 +246,7 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
             
             # データ保存
             self.dataEntry(fsetwork)
-            return redirect('/sheets')
+            return redirect('/sheets?ini_flg=False')
 
         return super().post(request, args, kwargs)
 
@@ -310,7 +310,8 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
                 # 入力がなくて登録レコードがあればMax＋1
                 rno = Sheets.objects.all().count()
                 if rno > 0:
-                    dno = Sheets.objects.all().aggregate(Max('dsp_no')) + 1
+                    nodic = Sheets.objects.all().aggregate(Max('dsp_no'))
+                    dno = nodic['dsp_no__max'] + 1
             sheetdat.dsp_no = dno
 
             sheetdat.created_by = self.request.user.username
@@ -471,7 +472,7 @@ class SheetsEditView(LoginRequiredMixin, FormView):
             
             # データ保存
             self.dataEntry(fsetwork)
-            return redirect('/sheets')
+            return redirect('/sheets?ini_flg=False'')
 
         return super().post(request, args, kwargs)
 
