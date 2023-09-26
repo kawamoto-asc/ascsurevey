@@ -18,6 +18,7 @@ class SheetForm(forms.Form):
         label='表示順', required=False,
         widget=forms.NumberInput(attrs={'class': 'ShortNumberInput'}),
     )
+    req_staff = forms.BooleanField(label='集計画面管理者権限要', required=False,)
 
     def __init__(self, *args, **kwargs):
         # viewからのパラメータ受け取り
