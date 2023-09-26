@@ -36,7 +36,7 @@ class Items(models.Model):
     sheet_id = models.ForeignKey(Sheets, on_delete=models.DO_NOTHING, db_column='sheet_id')
     item_no = models.IntegerField ('項目No.')
     content = models.TextField('内容', max_length=300)
-    input_type = models.IntegerField ('入力タイプ', choices=FIELD_TYPE_CHOICES)
+    input_type = models.CharField ('入力タイプ', choices=FIELD_TYPE_CHOICES)
 
     created_by = models.CharField('作成者', max_length=128, blank=True, null=True)
     update_by = models.CharField('更新者', max_length=128, blank=True, null=True)
