@@ -6,7 +6,7 @@ from sheets import views
 urlpatterns = [
     path('', views.SheetsListView.as_view(), name='sheets-list'),
     path('new/<int:pnendo>/<str:pflg>', views.SheetsCreateView.as_view(), name='sheet-new'),
-    #path('edit/<int:pnendo>/<int:id>', views.SheetsEditView.as_view(), name='sheet-edit'),
+    path('edit/<int:pnendo>/<int:id>', views.SheetsEditView.as_view(), name='sheet-edit'),
     #path('excelout', views.sheets_downloadexcel, name='sheet-download'),
     #path('excelin', views.SheetsExcelUploadView.as_view(), name='sheet-upload'),
 ]

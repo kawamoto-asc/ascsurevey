@@ -1,7 +1,5 @@
 from django import forms
-from django.core.exceptions import ValidationError
 from sheets.consts import INPUT_TYPE_CHOICES, FIELD_TYPE_CHOICES
-import re
 
 # シートマスタメンテナンス 検索フォーム
 class SheetQueryForm(forms.Form):
@@ -37,20 +35,7 @@ class SheetForm(forms.Form):
         if self.mod == 'edit':
             # シート名もリードオンリー
             self.fields['sheet_name'].widget.attrs['readonly'] = 'readonly'
-
-        '''
-            uobj = self.uobj
-            # ユーザ情報初期化
-            self.fields['busyo'].initial = uobj.busyo_id.bu_code
-            self.fields['location'].initial = uobj.location_id.location_code
-            self.fields['post'].initial = uobj.post_id.post_code
-            self.fields['user_id'].initial = uobj.user_id
-            self.fields['last_name'].initial = uobj.last_name
-            self.fields['first_name'].initial = uobj.first_name
-            self.fields['email'].initial = uobj.email
-            self.fields['is_staff'].initial = uobj.is_staff
-        '''
-            
+           
 # カラムマスタ 登録・編集フォーム
 # 追加ボタン押下時にエラーにしないようrequiredはFalse
 class ItemForm(forms.Form):
