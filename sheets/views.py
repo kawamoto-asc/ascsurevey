@@ -5,9 +5,10 @@ from django.db.models import Q, Max
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, FormView
-from surveys.models import Ujf
+from sheets.consts import INPUT_URL, AGGRE_URL
 from sheets.models import Sheets, Items
 from sheets.forms import SheetQueryForm, SheetForm, ItemForm
+from surveys.models import Ujf, Menu
 import re
 
 FORM_NUM = 1        # フォーム数
@@ -246,7 +247,7 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
             
             # データ保存
             self.dataEntry(fsetwork)
-            return redirect('/sheets')
+            return redirect('/sheets?ini_flg=False')
 
         return super().post(request, args, kwargs)
 
@@ -310,8 +311,13 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
                 # 入力がなくて登録レコードがあればMax＋1
                 rno = Sheets.objects.all().count()
                 if rno > 0:
-                    dno = Sheets.objects.all().aggregate(Max('dsp_no')) + 1
+                    nodic = Sheets.objects.all().aggregate(Max('dsp_no'))
+                    dno = nodic['dsp_no__max'] + 1
             sheetdat.dsp_no = dno
+            rstaff = False
+            if 'req_staff' in frmdic:
+                rstaff = True
+            sheetdat.req_staff = rstaff
 
             sheetdat.created_by = self.request.user.username
             sheetdat.save()
@@ -328,6 +334,38 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
                 itemdat.input_type = frmdic['form-' + str(i) + '-input_type']
                 itemdat.created_by = self.request.user.username
                 itemdat.save()
+
+            # メニューへの登録
+            inpurl = INPUT_URL + frmdic['sheet_name']
+            aggurl = AGGRE_URL + frmdic['sheet_name']
+
+            # 入力画面のURLの登録がなければ
+            imenu = Menu.objects.filter(
+                        url = inpurl,
+                ).exists()
+            if not imenu:
+                imenudat = Menu()
+                imenudat.title = frmdic['title']
+                imenudat.url = inpurl
+                imenudat.kbn = 1
+                imenudat.dsp_no = dno
+                imenudat.req_staff = False
+                imenudat.created_by = self.request.user.username
+                imenudat.save()
+
+            # 集計画面のURLの登録がなければ
+            amenu = Menu.objects.filter(
+                        url = aggurl,
+                ).exists()
+            if not amenu:
+                amenudat = Menu()
+                amenudat.title = frmdic['title'] + '集計'
+                amenudat.url = aggurl
+                amenudat.kbn = 2
+                amenudat.dsp_no = dno
+                amenudat.req_staff = rstaff
+                amenudat.created_by = self.request.user.username
+                amenudat.save()
 
 # 変更・削除
 class SheetsEditView(LoginRequiredMixin, FormView):
@@ -471,7 +509,7 @@ class SheetsEditView(LoginRequiredMixin, FormView):
             
             # データ保存
             self.dataEntry(fsetwork)
-            return redirect('/sheets')
+            return redirect('/sheets?ini_flg=False')
 
         return super().post(request, args, kwargs)
 
@@ -537,6 +575,7 @@ class SheetsEditView(LoginRequiredMixin, FormView):
                 if rno > 0:
                     dno = Sheets.objects.all().aggregate(Max('dsp_no')) + 1
             sheetdat.dsp_no = dno
+            sheetdat.req_staff = frmdic['req_staff']
 
             sheetdat.created_by = self.request.user.username
             sheetdat.save()

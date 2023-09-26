@@ -9,6 +9,7 @@ class Sheets(models.Model):
     title = models.CharField('アンケート名', max_length=128)
     input_type = models.IntegerField ('入力形式', choices=INPUT_TYPE_CHOICES)
     dsp_no = models.IntegerField ('表示順')
+    req_staff = models.BooleanField('集計画面スタッフ権限要否')
 
     created_by = models.CharField('作成者', max_length=128, blank=True, null=True)
     update_by = models.CharField('更新者', max_length=128, blank=True, null=True)
