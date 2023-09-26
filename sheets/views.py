@@ -275,6 +275,9 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
         if not frmdic['title']:
             form.add_error(None, 'アンケート名を入力してください。')
 
+        # 一問多答形式の場合は項目数は1件のみ
+        if frmdic['input_type'] == '2' and FORM_NUM > 1:
+            form.add_error(None, '一問多答形式で登録出来る項目数は１件のみです。')
 
         # 項目リスト部分のエラーチェック
         if FORM_NUM <= 0:
@@ -359,7 +362,7 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
                 ).exists()
             if not amenu:
                 amenudat = Menu()
-                amenudat.title = frmdic['title'] + '集計'
+                amenudat.title = frmdic['title'] + ' 集計'
                 amenudat.url = aggurl
                 amenudat.kbn = 2
                 amenudat.dsp_no = dno
