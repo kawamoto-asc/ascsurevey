@@ -111,7 +111,7 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
     form_class = SheetForm
     ItemFormSet = forms.formset_factory(
         form = ItemForm,
-        extra=1,
+        extra = 1,
         max_num = 50,
     )
     form_class2 = ItemFormSet
@@ -227,7 +227,7 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
                 else :
                     delkeyist.append(frm_ck_delete)
                     del_cnt += 1
-            # 項目No.での並べ変えは登録ボタン押下で正常登録後に実装
+            # 項目No.での並べ変えはしない
             for key, val in newdic.items():
                 FORM_VALUES[key] = val
             for keystr in delkeyist:
@@ -372,11 +372,11 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
 
 # 変更・削除
 class SheetsEditView(LoginRequiredMixin, FormView):
-    template_name = 'sheets/sheet_new.html'
+    template_name = 'sheets/sheet_edit.html'
     form_class = SheetForm
     ItemFormSet = forms.formset_factory(
         form = ItemForm,
-        extra=1,
+        extra = 0,
         max_num = 50,
     )
     form_class2 = ItemFormSet
@@ -387,8 +387,9 @@ class SheetsEditView(LoginRequiredMixin, FormView):
     # success_urlは動的にパラメータを渡さないといけないのでオーバーライド
     def get_success_url(self):
         url = reverse_lazy(
-            'sheet-new',
+            'sheet-edit',
              kwargs={'pnendo': self.kwargs['pnendo'],
+                     'id': self.kwargs['id'],
                      'pflg': 'False',
                      }
             )
@@ -400,8 +401,11 @@ class SheetsEditView(LoginRequiredMixin, FormView):
 
         # パラメータ年度、編集モード(新規）をフォームへ渡す
         pnendo = self.kwargs['pnendo']
-        mod = "new"
-        kwargs.update({'pnendo': pnendo, 'mod': mod})
+        mod = "edit"
+        sid = self.kwargs['id']
+        sobj = Sheets.objects.get(nendo=pnendo, id=sid)
+
+        kwargs.update({'pnendo': pnendo, 'mod': mod, 'sobj': sobj})
 
         return kwargs
 
@@ -419,7 +423,7 @@ class SheetsEditView(LoginRequiredMixin, FormView):
 
         # 初期化フラグからformset,formデータを削除
         if self.ini_flg:
-            FORM_NUM = 1
+            FORM_NUM = 0
             FORM_VALUES = {}
             SHEET_VALUES = {}
 
@@ -438,10 +442,16 @@ class SheetsEditView(LoginRequiredMixin, FormView):
                     'formset': self.form_class2(FORM_VALUES),
                     })
 
-        # なければ 新規にformset作成
+        # なければ 初回表示で、パラメータからformset作成
         else:
+            ilst = Items.objects.filter(nendo=self.kwargs['pnendo'], sheet_id=self.kwargs['id']).order_by('item_no')
+            FORM_NUM = len(ilst)
+            initial_data = []
+            for dat in ilst:
+                initial_data.append({'item_no': dat.item_no, 'content': dat.content, 'input_type': dat.input_type})
+            formset = self.form_class2(initial=initial_data)
             context.update({
-                'formset': self.form_class2(self.request.GET or None),
+                'formset': formset,
                 })
 
         return context
@@ -467,12 +477,12 @@ class SheetsEditView(LoginRequiredMixin, FormView):
         FORM_VALUES = fsetdic
         SHEET_VALUES = shtdic
 
-        # 追加ボタン押下なら
+        # 項目追加ボタン押下なら
         if 'btn_add' in request.POST:
             FORM_NUM += 1   # formsetのフォーム数インクリメント
             FORM_VALUES['form-TOTAL_FORMS'] = FORM_NUM
 
-        # 削除ボタン押下なら
+        # 項目削除ボタン押下なら
         if 'btn_del' in request.POST:
             #cnt_frm = 0
             to_cnt = 0
@@ -492,7 +502,7 @@ class SheetsEditView(LoginRequiredMixin, FormView):
                 else :
                     delkeyist.append(frm_ck_delete)
                     del_cnt += 1
-            # 項目No.での並べ変えは登録ボタン押下で正常登録後に実装
+            # 項目No.での並べ変えはしない
             for key, val in newdic.items():
                 FORM_VALUES[key] = val
             for keystr in delkeyist:
@@ -500,11 +510,11 @@ class SheetsEditView(LoginRequiredMixin, FormView):
             FORM_NUM -= del_cnt
             FORM_VALUES['form-TOTAL_FORMS'] = FORM_NUM
 
-        # 登録ボタン押下なら
-        if 'btn_entry' in request.POST:
+        # 更新ボタン押下なら
+        if 'btn_update' in request.POST:
             form = self.form_class(request.POST)
             # 入力チェック
-            self.datCheck_new(form, fsetwork)
+            self.datCheck_update(form, fsetwork)
 
             # エラーは全部シート部分に出力
             if form.non_field_errors():
@@ -513,33 +523,23 @@ class SheetsEditView(LoginRequiredMixin, FormView):
             # データ保存
             self.dataEntry(fsetwork)
             return redirect('/sheets?ini_flg=False')
+        
+        # 削除ボタン押下なら
+        if 'btn_delete' in request.POST:
+            self.dataDelete()
+            return redirect('/sheets?ini_flg=False')
 
         return super().post(request, args, kwargs)
 
     # 入力チェック処理
-    def datCheck_new(self, form, frmdic):
-        # 半角英数字と_@-.だけ入力可のチェック用
-        reg = re.compile(r'^[A-Za-z0-9_@\-\.]+$')
-
-        # シート部分のエラーチェック
-        if not frmdic['sheet_name']:
-            form.add_error(None, 'シート名を入力してください。')
-        else:
-            sheetname = frmdic['sheet_name']
-            if reg.match(sheetname) is None:
-                form.add_error(None, 'シート名は半角英数字か_-@で入力してください。')
-            else:
-                nen = frmdic['nendo']
-                sheet = Sheets.objects.filter(
-                        nendo = nen,
-                        sheet_name = sheetname,
-                ).exists()
-                if sheet:
-                    form.add_error(None, nen + 'の' + sheetname + 'は既に登録済みです。')
+    def datCheck_update(self, form, frmdic):
 
         if not frmdic['title']:
             form.add_error(None, 'アンケート名を入力してください。')
 
+        # 一問多答形式の場合は項目数は1件のみ
+        if frmdic['input_type'] == '2' and FORM_NUM > 1:
+            form.add_error(None, '一問多答形式で登録出来る項目数は１件のみです。')
 
         # 項目リスト部分のエラーチェック
         if FORM_NUM <= 0:
@@ -561,10 +561,11 @@ class SheetsEditView(LoginRequiredMixin, FormView):
     # データ保存処理
     def dataEntry(self, frmdic):
         with transaction.atomic():
+            nendo = self.kwargs['pnendo']
+            sheet_id=self.kwargs['id']
+
             # シート情報を保存
-            sheetdat = Sheets()
-            sheetdat.nendo = frmdic['nendo']
-            sheetdat.sheet_name = frmdic['sheet_name']
+            sheetdat = Sheets.objects.get(nendo=nendo, id=sheet_id)
             sheetdat.title = frmdic['title']
             sheetdat.input_type = frmdic['input_type']
             # 表示順
@@ -578,20 +579,67 @@ class SheetsEditView(LoginRequiredMixin, FormView):
                 if rno > 0:
                     dno = Sheets.objects.all().aggregate(Max('dsp_no')) + 1
             sheetdat.dsp_no = dno
-            sheetdat.req_staff = frmdic['req_staff']
+            rstaff = False
+            if 'req_staff' in frmdic:
+                rstaff = True
+            sheetdat.req_staff = rstaff
 
-            sheetdat.created_by = self.request.user.username
+            sheetdat.update_by = self.request.user.username
             sheetdat.save()
 
-            # 項目情報保存
-            nendo = frmdic['nendo']
-            sheetid = Sheets.objects.get(nendo=nendo, sheet_name=frmdic['sheet_name'])
+            # 項目情報保存 delete&Insert
+            items = Items.objects.filter(nendo=nendo, sheet_id=sheet_id)
+            items.delete()
             for i in range(FORM_NUM):
                 itemdat = Items()
                 itemdat.nendo = nendo
-                itemdat.sheet_id = sheetid
+                itemdat.sheet_id = sheetdat
                 itemdat.item_no = frmdic['form-' + str(i) + '-item_no']
                 itemdat.content = frmdic['form-' + str(i) + '-content']
                 itemdat.input_type = frmdic['form-' + str(i) + '-input_type']
-                itemdat.created_by = self.request.user.username
+                itemdat.update_by = self.request.user.username
                 itemdat.save()
+
+            # メニューへの更新
+            inpurl = INPUT_URL + frmdic['sheet_name']
+            aggurl = AGGRE_URL + frmdic['sheet_name']
+
+            # 入力画面のURLの登録があれば
+            imenu = Menu.objects.filter(
+                        url = inpurl,
+                ).exists()
+            if imenu:
+                imenudat = Menu.objects.get(url=inpurl)
+                imenudat.title = frmdic['title']
+                imenudat.kbn = 1
+                imenudat.dsp_no = dno
+                imenudat.req_staff = False
+                imenudat.update_by = self.request.user.username
+                imenudat.save()
+
+            # 集計画面のURLの登録があれば
+            amenu = Menu.objects.filter(
+                        url = aggurl,
+                ).exists()
+            if amenu:
+                amenudat = Menu.objects.get(url=aggurl)
+                amenudat.title = frmdic['title'] + ' 集計'
+                amenudat.kbn = 2
+                amenudat.dsp_no = dno
+                amenudat.req_staff = rstaff
+                amenudat.update_by = self.request.user.username
+                amenudat.save()
+
+    # データ削除処理
+    def dataDelete(self):
+        with transaction.atomic():
+            nendo = self.kwargs['pnendo']
+            sheet_id=self.kwargs['id']
+
+            # シート情報削除
+            sheet = Sheets.objects.get(nendo=nendo, id=sheet_id)
+            sheet.delete()
+
+            # 項目情報削除
+            items = Items.objects.filter(nendo=nendo, sheet_id=sheet_id)
+            items.delete()

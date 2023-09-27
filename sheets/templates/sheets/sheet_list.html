@@ -26,7 +26,6 @@
             {% if not ini_flg %}
                 <div class="mb-1">
                     <a class="btn btn-warning text-light" href="{% url 'sheet-new' request.session.form_value.0 'True' %}">新規作成</a>
-                    <!-- 編集画面へ移動の予定 <a class="ms-3 btn btn-success opacity-75" href="#">Excel出力</a>-->
                     <a class="ms-3 btn btn-success opacity-75" href="#">Excel入力</a>
                 </div>
                 {% if object_list|length == 0 %}
@@ -49,7 +48,7 @@
                         {% for sdat in object_list %}
                             <tr>
                                 <td>{{ sdat.nendo }}</td>
-                                <td><a href="{% url 'sheet-edit' request.session.form_value.0 sdat.id %}">{{ sdat.sheet_name }}</a></td>
+                                <td><a href="{% url 'sheet-edit' request.session.form_value.0 sdat.id 'True' %}">{{ sdat.sheet_name }}</a></td>
                                 <td>{{ sdat.title }}</td>
                                 <td>{{ sdat.created_by|default_if_none:"" }}</td>
                                 <td>{{ sdat.created_at|default_if_none:""|date:"Y/m/d H:i" }}</td>
@@ -60,9 +59,17 @@
                         </tbody>
                     </table>
                 </div>
+                {% endif %}
             {% endif %}
-        {% endif %}
-    </section>
+        </section>
     </div>
 
+    <script>
+        // テーブルのヘッダ固定用divの高さ設定
+        let pdiv = document.querySelector('#result-div');
+        if(pdiv) {
+            let ht = document.documentElement.clientHeight - 250;
+            pdiv.style.height = ht;
+        }
+    </script>
 {% endblock %}            

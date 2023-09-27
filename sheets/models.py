@@ -55,7 +55,7 @@ class Items(models.Model):
         ]
 
     def __str__(self):
-        return str(self.nendo) + '_' + self.sheet_id + '_' + str(self.item_no)
+        return str(self.nendo) + '_' + self.sheet_id.sheet_name + '_' + str(self.item_no)
 
     class Meta:
         db_table = 'surveys_item'

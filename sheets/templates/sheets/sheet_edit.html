@@ -12,8 +12,11 @@
             {% csrf_token %}
             <div class="d-flex justify-content-end">
                 <div>
-                    <input class="btn btn-info text-light"
+                    <a class="me-3 btn btn-success opacity-75" href="#">Excel出力</a>
+                    <input class="ms-3 btn btn-info text-light"
                         type="submit" name="btn_update" value="更新" onclick="return confirm('更新しますか？')">
+                    <input class="ms-3 btn btn-danger opacity-75 text-light"
+                        type="submit" name="btn_delete" value="削除" onclick="return confirm('シートを削除しますか？')">
                     <a class="ms-3 me-3 btn btn-warning text-light" href="{% url 'sheets-list' %}?ini_flg=False">戻る</a>
                 </div>
             </div>
