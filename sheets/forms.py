@@ -36,6 +36,14 @@ class SheetForm(forms.Form):
         if self.mod == 'edit':
             # シート名もリードオンリー
             self.fields['sheet_name'].widget.attrs['readonly'] = 'readonly'
+
+            sobj = self.sobj
+            # シート情報初期化
+            self.fields['sheet_name'].initial = sobj.sheet_name
+            self.fields['title'].initial = sobj.title
+            self.fields['input_type'].initial = sobj.input_type
+            self.fields['dsp_no'].initial = sobj.dsp_no
+            self.fields['req_staff'].initial = sobj.req_staff
            
 # カラムマスタ 登録・編集フォーム
 # 追加ボタン押下時にエラーにしないようrequiredはFalse
