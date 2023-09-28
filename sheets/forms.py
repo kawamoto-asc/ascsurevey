@@ -1,4 +1,5 @@
 from django import forms
+from django.core.exceptions import ValidationError
 from sheets.consts import INPUT_TYPE_CHOICES, FIELD_TYPE_CHOICES
 
 # シートマスタメンテナンス 検索フォーム
@@ -66,7 +67,6 @@ class ItemForm(forms.Form):
         widget=forms.CheckboxInput(attrs={'class': 'check'}),
     )
 
-'''
 # Excel入力フォーム
 class FileUploadForm(forms.Form):
     file = forms.FileField(label='ファイル', required=True,)
@@ -77,4 +77,3 @@ class FileUploadForm(forms.Form):
         if not file.name.endswith('xlsx'):
             raise ValidationError('xlsxファイルを選択してください。')
         return file
-'''

@@ -10,6 +10,12 @@ FIELD_TYPE_CHOICES = (
     ('textarea', 'textarea'),
 )
 
+# 集計タイプ
+AGGRE_TYPE_CHOICES = (
+    (0, '0:集計なし'),
+    (1, '1:集計あり'),
+)
+
 # アンケート入力画面URL
 INPUT_URL = '/ascsurvey/input/'
 
