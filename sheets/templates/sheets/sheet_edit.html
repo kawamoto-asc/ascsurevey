@@ -12,7 +12,7 @@
             {% csrf_token %}
             <div class="d-flex justify-content-end">
                 <div>
-                    <a class="me-3 btn btn-success opacity-75" href="#">Excel出力</a>
+                    <a class="me-3 btn btn-success opacity-75" href="{% url 'sheet-download' pnendo id %}">Excel出力</a>
                     <input class="ms-3 btn btn-info text-light"
                         type="submit" name="btn_update" value="更新" onclick="return confirm('更新しますか？')">
                     <input class="ms-3 btn btn-danger opacity-75 text-light"
