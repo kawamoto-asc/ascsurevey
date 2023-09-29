@@ -8,5 +8,5 @@ urlpatterns = [
     path('new/<int:pnendo>/<str:pflg>', views.SheetsCreateView.as_view(), name='sheet-new'),
     path('edit/<int:pnendo>/<int:id>/<str:pflg>', views.SheetsEditView.as_view(), name='sheet-edit'),
     path('excelout/<int:pnendo>/<int:id>', views.SheetsDownloadExcel, name='sheet-download'),
-    #path('excelin', views.SheetsExcelUploadView.as_view(), name='sheet-upload'),
+    path('excelin', views.SheetFileUploadView.as_view(), name='sheet-upload'),
 ]
