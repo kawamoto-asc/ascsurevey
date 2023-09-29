@@ -2,17 +2,21 @@
 
 <table class="table-bordered mt-2">
     <tr>
+        <th class="bg-light">削</th>
         <th class="bg-light">項目No.</th>
         <th class="bg-light">内容</th>
         <th class="bg-light">入力タイプ</th>
-        <th class="bg-light">削</th>
+        <th class="bg-light">解答</th>
+        <th class="bg-light">配点</th>
     </tr>
     {% for form2 in formset  %}
         <tr>
+            <td class="p-1 text-center">{{ form2.ck_delete }}</td>
             <td class="p-1 text-center">{{ form2.item_no }}</td>
             <td class="p-1 text-center">{{ form2.content }}</td>
             <td class="p-1 text-center">{{ form2.input_type }}</td>
-            <td class="p-1 text-center">{{ form2.ck_delete }}</td>
+            <td class="p-1 text-center">{{ form2.answer }}</td>
+            <td class="p-1 text-center">{{ form2.haiten }}</td>
         </tr>
     {% endfor %}
     {{ formset.management_form }}

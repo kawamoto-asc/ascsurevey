@@ -12,7 +12,7 @@
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <table>
-                <tr><td>※一度に取り込めるのは１シート分のみです。</td></tr>
+                <tr><td class="text-danger">※一度に取り込めるのは１シート分のみです。</td></tr>
                 <tr>
                     <td>{{ form.file }}</td>
                     <td><button class="ms-3 btn btn-info text-light" type="submit"

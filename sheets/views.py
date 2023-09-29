@@ -7,7 +7,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, FormView
-from sheets.consts import INPUT_TYPE_CHOICES, FIELD_TYPE_CHOICES, INPUT_URL, AGGRE_URL
+from sheets.consts import INPUT_TYPE_CHOICES, FIELD_TYPE_CHOICES, AGGRE_TYPE_CHOICES, INPUT_URL, AGGRE_URL
 from sheets.models import Sheets, Items
 from sheets.forms import SheetQueryForm, SheetForm, ItemForm, FileUploadForm
 from surveys.models import Ujf, Menu
@@ -229,6 +229,8 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
                     newdic[to_itemno_str] = FORM_VALUES[frm_ck_delete.replace('ck_delete', 'item_no')]
                     newdic[to_itemno_str.replace('item_no', 'content')] = FORM_VALUES[frm_ck_delete.replace('ck_delete', 'content')]
                     newdic[to_itemno_str.replace('item_no', 'input_type')] = FORM_VALUES[frm_ck_delete.replace('ck_delete', 'input_type')]
+                    newdic[to_itemno_str.replace('item_no', 'answer')] = FORM_VALUES[frm_ck_delete.replace('ck_delete', 'answer')]
+                    newdic[to_itemno_str.replace('item_no', 'haiten')] = FORM_VALUES[frm_ck_delete.replace('ck_delete', 'haiten')]
                     to_cnt += 1
                 else :
                     delkeyist.append(frm_ck_delete)
@@ -262,7 +264,13 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
         # 半角英数字と_@-.だけ入力可のチェック用
         reg = re.compile(r'^[A-Za-z0-9_@\-\.]+$')
 
+        # 数字と-.だけ入力可のチェック用
+        rnum = re.compile(r'^[0-9\-\.]+$')
+
         # シート部分のエラーチェック
+        if not frmdic['nendo']:
+            form.add_error(None, '年度を入力してください。')
+
         if not frmdic['sheet_name']:
             form.add_error(None, 'シート名を入力してください。')
         else:
@@ -291,16 +299,21 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
         list_ino = []
         for i in range(FORM_NUM):
             if not frmdic['form-' + str(i) + '-item_no']:
-                form.add_error(None, '項目Noの入力がありません(' + str(i + 1) + '行目)')
+                form.add_error(None, '項目Noの入力がありません。(' + str(i + 1) + '行目)')
             else:
                 ino = frmdic['form-' + str(i) + '-item_no']
                 if ino in list_ino:
-                    form.add_error(None, '項目Noが重複しています(' + str(i + 1) + '行目)')
+                    form.add_error(None, '項目Noが重複しています。(' + str(i + 1) + '行目)')
                 else :
                     list_ino.append(ino)
 
             if not frmdic['form-' + str(i) + '-content']:
-                form.add_error(None, '内容の入力がありません(' + str(i + 1) + '行目)')
+                form.add_error(None, '内容の入力がありません。(' + str(i + 1) + '行目)')
+
+            if frmdic['form-' + str(i) + '-haiten']:
+                hten = frmdic['form-' + str(i) + '-haiten']
+                if rnum.match(hten) is None:
+                    form.add_error(None, '配点に数値以外が入力されています。(' + str(i + 1) + '行目)')
 
     # データ保存処理
     def dataEntry(self, frmdic):
@@ -310,7 +323,6 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
             sheetdat.nendo = frmdic['nendo']
             sheetdat.sheet_name = frmdic['sheet_name']
             sheetdat.title = frmdic['title']
-            sheetdat.input_type = frmdic['input_type']
             # 表示順
             dno = 1
             if frmdic['dsp_no']:
@@ -323,6 +335,10 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
                     nodic = Sheets.objects.all().aggregate(Max('dsp_no'))
                     dno = nodic['dsp_no__max'] + 1
             sheetdat.dsp_no = dno
+            sheetdat.input_type = frmdic['input_type']
+            sheetdat.aggre_type = frmdic['aggre_type']
+            sheetdat.remarks1 = frmdic['remarks1']
+            sheetdat.remarks2 = frmdic['remarks2']
             rstaff = False
             if 'req_staff' in frmdic:
                 rstaff = True
@@ -341,6 +357,9 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
                 itemdat.item_no = frmdic['form-' + str(i) + '-item_no']
                 itemdat.content = frmdic['form-' + str(i) + '-content']
                 itemdat.input_type = frmdic['form-' + str(i) + '-input_type']
+                itemdat.answer = frmdic['form-' + str(i) + '-answer']
+                if frmdic['form-' + str(i) + '-haiten']:
+                    itemdat.haiten = float(frmdic['form-' + str(i) + '-haiten'])
                 itemdat.created_by = self.request.user.username
                 itemdat.save()
 
@@ -458,7 +477,12 @@ class SheetsEditView(LoginRequiredMixin, FormView):
             FORM_NUM = len(ilst)
             initial_data = []
             for dat in ilst:
-                initial_data.append({'item_no': dat.item_no, 'content': dat.content, 'input_type': dat.input_type})
+                initial_data.append({'item_no': dat.item_no,
+                                     'content': dat.content,
+                                      'input_type': dat.input_type,
+                                      'answer': dat.answer,
+                                      'haiten': dat.haiten,
+                                    })
             formset = self.form_class2(initial=initial_data)
             context.update({
                 'formset': formset,
@@ -508,6 +532,8 @@ class SheetsEditView(LoginRequiredMixin, FormView):
                     newdic[to_itemno_str] = FORM_VALUES[frm_ck_delete.replace('ck_delete', 'item_no')]
                     newdic[to_itemno_str.replace('item_no', 'content')] = FORM_VALUES[frm_ck_delete.replace('ck_delete', 'content')]
                     newdic[to_itemno_str.replace('item_no', 'input_type')] = FORM_VALUES[frm_ck_delete.replace('ck_delete', 'input_type')]
+                    newdic[to_itemno_str.replace('item_no', 'answer')] = FORM_VALUES[frm_ck_delete.replace('ck_delete', 'answer')]
+                    newdic[to_itemno_str.replace('item_no', 'haiten')] = FORM_VALUES[frm_ck_delete.replace('ck_delete', 'haiten')]
                     to_cnt += 1
                 else :
                     delkeyist.append(frm_ck_delete)
@@ -543,6 +569,8 @@ class SheetsEditView(LoginRequiredMixin, FormView):
 
     # 入力チェック処理
     def datCheck_update(self, form, frmdic):
+        # 数字と-.だけ入力可のチェック用
+        rnum = re.compile(r'^[0-9\-\.]+$')
 
         if not frmdic['title']:
             form.add_error(None, 'アンケート名を入力してください。')
@@ -568,6 +596,11 @@ class SheetsEditView(LoginRequiredMixin, FormView):
             if not frmdic['form-' + str(i) + '-content']:
                 form.add_error(None, '内容の入力がありません(' + str(i + 1) + '行目)')
 
+            if frmdic['form-' + str(i) + '-haiten']:
+                hten = frmdic['form-' + str(i) + '-haiten']
+                if rnum.match(hten) is None:
+                    form.add_error(None, '配点に数値以外が入力されています。(' + str(i + 1) + '行目)')
+
     # データ保存処理
     def dataEntry(self, frmdic):
         with transaction.atomic():
@@ -577,7 +610,6 @@ class SheetsEditView(LoginRequiredMixin, FormView):
             # シート情報を保存
             sheetdat = Sheets.objects.get(nendo=nendo, id=sheet_id)
             sheetdat.title = frmdic['title']
-            sheetdat.input_type = frmdic['input_type']
             # 表示順
             dno = 1
             if frmdic['dsp_no']:
@@ -589,6 +621,10 @@ class SheetsEditView(LoginRequiredMixin, FormView):
                 if rno > 0:
                     dno = Sheets.objects.all().aggregate(Max('dsp_no')) + 1
             sheetdat.dsp_no = dno
+            sheetdat.input_type = frmdic['input_type']
+            sheetdat.aggre_type = frmdic['aggre_type']
+            sheetdat.remarks1 = frmdic['remarks1']
+            sheetdat.remarks2 = frmdic['remarks2']
             rstaff = False
             if 'req_staff' in frmdic:
                 rstaff = True
@@ -607,7 +643,10 @@ class SheetsEditView(LoginRequiredMixin, FormView):
                 itemdat.item_no = frmdic['form-' + str(i) + '-item_no']
                 itemdat.content = frmdic['form-' + str(i) + '-content']
                 itemdat.input_type = frmdic['form-' + str(i) + '-input_type']
-                itemdat.update_by = self.request.user.username
+                itemdat.answer = frmdic['form-' + str(i) + '-answer']
+                if frmdic['form-' + str(i) + '-haiten']:
+                    itemdat.haiten = float(frmdic['form-' + str(i) + '-haiten'])
+                itemdat.created_by = self.request.user.username
                 itemdat.save()
 
             # メニューへの更新
@@ -662,7 +701,7 @@ def SheetsDownloadExcel(request, pnendo, id):
     # データ出力開始行
     row = 2
     # 列数
-    col_max = 14
+    col_max = 21
 
     # スタイルを取得
     cellstylelist = []
@@ -670,8 +709,6 @@ def SheetsDownloadExcel(request, pnendo, id):
         cellstyle = ws.cell(row, (i+1))._style
         cellstylelist.append(cellstyle)
 
-    print(pnendo)
-    print(id)
     sheet = Sheets.objects.get(id=id)
     itemlist = Items.objects.filter(nendo=pnendo, sheet_id=sheet)
 
@@ -679,23 +716,37 @@ def SheetsDownloadExcel(request, pnendo, id):
     ityp_dic = {}
     for ival, ilabel in INPUT_TYPE_CHOICES:
         ityp_dic[ival] = ilabel
+    ftyp_dic = {}
+    for fval, flabel in FIELD_TYPE_CHOICES:
+        ftyp_dic[fval] = flabel
+    atyp_dic = {}
+    for aval, alabel in AGGRE_TYPE_CHOICES:
+        atyp_dic[aval] = alabel
 
     for idat in itemlist:
         # 値を設定
         ws.cell(row, 1).value = sheet.nendo
         ws.cell(row, 2).value = sheet.sheet_name
         ws.cell(row, 3).value = sheet.title
-        ws.cell(row, 4).value = sheet.input_type
-        ws.cell(row, 5).value = ityp_dic[sheet.input_type]
-        ws.cell(row, 6).value = sheet.dsp_no
-        ws.cell(row, 7).value = sheet.req_staff
-        ws.cell(row, 8).value = idat.item_no
-        ws.cell(row, 9).value = idat.content
-        ws.cell(row, 10).value = idat.input_type
-        ws.cell(row, 11).value = idat.created_by
-        ws.cell(row, 12).value = idat.created_at.astimezone(timezone('Asia/Tokyo')).strftime('%Y/%m/%d %H:%M:%S')
-        ws.cell(row, 13).value = idat.update_by
-        ws.cell(row, 14).value = idat.updated_at.astimezone(timezone('Asia/Tokyo')).strftime('%Y/%m/%d %H:%M:%S')
+        ws.cell(row, 4).value = sheet.dsp_no
+        ws.cell(row, 5).value = sheet.input_type
+        ws.cell(row, 6).value = ityp_dic[sheet.input_type]
+        ws.cell(row, 7).value = sheet.aggre_type
+        ws.cell(row, 8).value = atyp_dic[sheet.aggre_type]
+        ws.cell(row, 9).value = sheet.req_staff
+        ws.cell(row, 10).value = sheet.remarks1
+        ws.cell(row, 11).value = sheet.remarks2
+        ws.cell(row, 12).value = idat.item_no
+        ws.cell(row, 13).value = idat.content
+        ws.cell(row, 14).value = idat.input_type
+        ws.cell(row, 15).value = ftyp_dic[idat.input_type]
+        ws.cell(row, 16).value = idat.answer
+        ws.cell(row, 17).value = idat.haiten
+        # 作成・更新情報はシートのものを出力（項目はDeleteInsertだから作成情報＝更新情報になってしまうから）
+        ws.cell(row, 18).value = sheet.created_by
+        ws.cell(row, 19).value = sheet.created_at.astimezone(timezone('Asia/Tokyo')).strftime('%Y/%m/%d %H:%M:%S')
+        ws.cell(row, 20).value = sheet.update_by
+        ws.cell(row, 21).value = sheet.updated_at.astimezone(timezone('Asia/Tokyo')).strftime('%Y/%m/%d %H:%M:%S')
         # スタイルを設定
         for i in range(col_max):
             ws.cell(row, (i+1))._style = cellstylelist[i]
@@ -728,14 +779,20 @@ class SheetFileUploadView(LoginRequiredMixin, FormView):
         ftyp_dic = {}
         for fval, flabel in FIELD_TYPE_CHOICES:
             ftyp_dic[fval] = flabel
+        atyp_dic = {}
+        for aval, alabel in AGGRE_TYPE_CHOICES:
+            atyp_dic[aval] = alabel
 
         # エラーチェック
         chk_nendo = None
         chk_sname = None
         chk_aname = None
         chk_itype = None
+        chk_atype = None
         chk_dspno = None
         chk_staff = None
+        chk_rmks1 = None
+        chk_rmks2 = None
         # 登録済みチェック用
         inolist = []
 
@@ -784,6 +841,22 @@ class SheetFileUploadView(LoginRequiredMixin, FormView):
                     if chk_aname != str_aname:
                         form.add_error(None, '異なるアンケート名が入力されています。(%s行目)' % str((i+2)))
 
+            # 表示順チェック
+            strdspno = str(ldat['表示順'])
+            # 表示順は入力なくてもOK
+            if strdspno != 'nan':
+                # 入力があるけど数字じゃなければ
+                if reg.match(strdspno) is None:
+                    form.add_error(None, '表示順に数字以外の文字の入力があります。(%s行目)' % str((i+2)))
+                else:
+                    # 比較用表示順に値がなければセット
+                    if not chk_dspno:
+                        chk_dspno = int(float(strdspno))
+                    else:
+                        # 比較用表示順と違う値が入っていればエラー
+                        if chk_dspno != int(float(strdspno)):
+                            form.add_error(None, '異なる表示順の値が入力されています。(%s行目)' % str((i+2)))
+
             # 入力形式チェック
             str_itype = str(ldat['入力形式'])
             if str_itype == 'nan':
@@ -803,22 +876,25 @@ class SheetFileUploadView(LoginRequiredMixin, FormView):
                         if chk_itype != str_itype:
                             form.add_error(None, '異なる入力形式が入力されています。(%s行目)' % str((i+2)))
                         
-            # 表示順チェック
-            strdspno = str(ldat['表示順'])
-            # 表示順は入力なくてもOK
-            if strdspno != 'nan':
-                # 入力があるけど数字じゃなければ
-                if reg.match(strdspno) is None:
-                    form.add_error(None, '表示順に数字以外の文字の入力があります。(%s行目)' % str((i+2)))
+            # 集計タイプチェック
+            str_atype = str(ldat['集計タイプ'])
+            if str_atype == 'nan':
+                form.add_error(None, '集計タイプの入力がありません。(%s行目)' % str((i+2)))
+            elif reg.match(str_atype) is None:
+                form.add_error(None, '集計タイプに誤りがあります。(%s行目)' % str((i+2)))
+            else:
+                # 集計タイプチェック 桁の小さい数値は小数点になって取り込まれるのでfloatに変換後intへ変換
+                if int(float(str_atype)) not in ityp_dic:
+                    form.add_error(None, '集計タイプに誤りがあります。(%s行目)' % str((i+2)))
                 else:
-                    # 比較用表示順に値がなければセット
-                    if not chk_dspno:
-                        chk_dspno = int(float(strdspno))
+                    # 比較用集計タイプに値がなければセット
+                    if not chk_atype:
+                        chk_atype = str_atype
                     else:
-                        # 比較用表示順と違う値が入っていればエラー
-                        if chk_dspno != int(float(strdspno)):
-                            form.add_error(None, '異なる表示順の値が入力されています。(%s行目)' % str((i+2)))
-
+                        # 比較用集計タイプと違う値が入っていればエラー
+                        if chk_atype != str_atype:
+                            form.add_error(None, '異なる集計タイプが入力されています。(%s行目)' % str((i+2)))
+                        
             # 集計画面管理者権限要チェック
             strstaff = str(ldat['集計画面管理者権限要'])
             # 集計画面管理者権限要は入力なくてもOK
@@ -830,6 +906,20 @@ class SheetFileUploadView(LoginRequiredMixin, FormView):
                     # 比較用集計画面管理者権限要と違う値が入っていればエラー
                     if chk_staff != strstaff:
                         form.add_error(None, '異なる集計画面管理者権限要の値が入力されています。(%s行目)' % str((i+2)))
+
+            # 備考1 備考はノーチェックで一番最後に入った値を登録するようにする
+            str_rmks1 = str(ldat['備考1'])
+            if str_rmks1 != 'nan':
+                # 比較用集計タイプに値がなければセット
+                if not chk_rmks1:
+                    chk_rmks1 = str_rmks1
+
+            # 備考2
+            str_rmks2 = str(ldat['備考2'])
+            if str_rmks2 != 'nan':
+                # 比較用集計タイプに値がなければセット
+                if not chk_rmks2:
+                    chk_rmks2 = str_rmks2
 
             # 項目No.入力チェック
             str_itemno = str(ldat['項目No.'])
@@ -859,6 +949,13 @@ class SheetFileUploadView(LoginRequiredMixin, FormView):
                 # 入力タイプチェック
                 if str_ftype not in ftyp_dic:
                     form.add_error(None, '入力タイプに誤りがあります。(%s行目)' % str((i+2)))
+            # 解答はノーチェック
+
+            # 配点チェック
+            strhten  = str(ldat['配点'])
+            if strhten != 'nan':
+               if reg.match(strhten) is None:
+                form.add_error(None, '配点に数字以外の文字の入力があります。(%s行目)' % str((i+2)))
 
         # エラーがあったら終了
         if form.non_field_errors():
@@ -866,7 +963,7 @@ class SheetFileUploadView(LoginRequiredMixin, FormView):
 
         # エラーがなければ登録処理
         reg_staff = False
-        if chk_staff == True:
+        if chk_staff == 'True':
             reg_staff = True
 
         # 表示順の入力がなければ
@@ -883,22 +980,21 @@ class SheetFileUploadView(LoginRequiredMixin, FormView):
             # シートマスタにあれば更新、なければ登録
             if Sheets.objects.filter(nendo=chk_nendo, sheet_name=chk_sname).exists():
                 sheetdat = Sheets.objects.get(nendo=chk_nendo, sheet_name=chk_sname)
-                sheetdat.title = chk_aname
-                sheetdat.input_type = chk_itype
-                sheetdat.dsp_no = chk_dspno
-                sheetdat.req_staff = reg_staff
                 sheetdat.update_by = self.request.user.username
-                sheetdat.save()
             else:
                 sheetdat = Sheets()
                 sheetdat.nendo = chk_nendo
-                sheetdat.sheet_name = chk_sname
-                sheetdat.title = chk_aname
-                sheetdat.input_type = chk_itype
-                sheetdat.dsp_no = chk_dspno
-                sheetdat.req_staff = reg_staff
                 sheetdat.created_by = self.request.user.username
-                sheetdat.save()
+
+            sheetdat.sheet_name = chk_sname
+            sheetdat.title = chk_aname
+            sheetdat.dsp_no = chk_dspno
+            sheetdat.input_type = chk_itype
+            sheetdat.aggre_type = chk_atype
+            sheetdat.req_staff = reg_staff
+            sheetdat.remarks1 = chk_rmks1
+            sheetdat.remarks2 = chk_rmks2
+            sheetdat.save()
 
             # メニューマスタに登録があれば更新、なければ登録
             inpurl = INPUT_URL + chk_sname
@@ -949,6 +1045,8 @@ class SheetFileUploadView(LoginRequiredMixin, FormView):
                 item_no = int(float(ldat['項目No.']))
                 content = ldat['内容']
                 input_type = ldat['入力タイプ']
+                answer = ldat['解答']
+                haiten = str(ldat['配点'])
 
                 item = Items()
                 item.nendo = chk_nendo
@@ -956,6 +1054,9 @@ class SheetFileUploadView(LoginRequiredMixin, FormView):
                 item.item_no = item_no
                 item.content = content
                 item.input_type = input_type
+                item.answer = answer
+                if haiten != 'nan':
+                    item.haiten = float(haiten)
                 item.created_by = self.request.user.username
                 item.save()
 

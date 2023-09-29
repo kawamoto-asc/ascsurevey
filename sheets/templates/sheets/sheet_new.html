@@ -16,6 +16,7 @@
                     <a class="ms-3 me-3 btn btn-warning text-light" href="{% url 'sheets-list' %}?ini_flg=False">戻る</a>
                 </div>
             </div>
+            <p class="text-danger">※年度違いのアンケートを作成する場合、シート名は同じ名前で登録してください。</p>
             {% include './sheet_detail1.html' %}
             <div class="text-danger">
                 {% if form.non_field_errors %}
@@ -24,7 +25,7 @@
                     {% endfor %}
                 {% endif %}
             </div>
-            <div>
+            <div class="mt-3">
                 <div>
                     <input type="submit" value="追加" name="btn_add">
                     <input type="submit" value="削除" name="btn_del" onclick="return confirm('チェック行を削除しますか？')">

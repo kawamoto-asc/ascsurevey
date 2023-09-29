@@ -1,5 +1,5 @@
 <!--シート設定部-->
-<table class="qlayouttable">
+<table class="mt-3 qlayouttable">
     <tr>
         <th>{{ form.nendo.label_tag }}</th>
         <td class="pe-3">{{ form.nendo }}</td>
@@ -11,11 +11,23 @@
 </table>
 <table class="mt-2">
     <tr>
-        <th>{{ form.input_type.label_tag }}</th>
-        <td class="pe-3">{{ form.input_type }}</td>
         <th>{{ form.dsp_no.label_tag }}</th>
         <td>{{ form.dsp_no }}</td>
+        <th class="ps-3">{{ form.input_type.label_tag }}</th>
+        <td>{{ form.input_type }}</td>
+        <th class="ps-3">{{ form.aggre_type.label_tag }}</th>
+        <td>{{ form.aggre_type }}</td>
         <th class="ps-3">{{ form.req_staff.label_tag }}</th>
         <td class="ps-1">{{ form.req_staff }}</td>
+    </tr>
+</table>
+<table class="mt-2">
+    <tr>
+        <th>{{ form.remarks1.label_tag }}</th>
+        <td>{{ form.remarks1 }}</td>
+    </tr>
+    <tr>
+        <th>{{ form.remarks2.label_tag }}</th>
+        <td class="pt-2">{{ form.remarks2 }}</td>
     </tr>
 </table>
