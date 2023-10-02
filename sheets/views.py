@@ -884,7 +884,7 @@ class SheetFileUploadView(LoginRequiredMixin, FormView):
                 form.add_error(None, '集計タイプに誤りがあります。(%s行目)' % str((i+2)))
             else:
                 # 集計タイプチェック 桁の小さい数値は小数点になって取り込まれるのでfloatに変換後intへ変換
-                if int(float(str_atype)) not in ityp_dic:
+                if int(float(str_atype)) not in atyp_dic:
                     form.add_error(None, '集計タイプに誤りがあります。(%s行目)' % str((i+2)))
                 else:
                     # 比較用集計タイプに値がなければセット
