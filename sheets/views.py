@@ -193,7 +193,7 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
         global SHEET_VALUES
 
         # 一度Submitしたので、初期化フラグをOFF
-        self.ini_flg = False
+        self.kwargs['pflg'] = 'False'
 
         # シートデータ項目データ表示用保存
         fsetwork = request.POST.copy()
@@ -496,7 +496,7 @@ class SheetsEditView(LoginRequiredMixin, FormView):
         global SHEET_VALUES
 
         # 一度Submitしたので、初期化フラグをOFF
-        self.ini_flg = False
+        self.kwargs['pflg'] = 'False'
 
         # シートデータ項目データ表示用保存
         fsetwork = request.POST.copy()
