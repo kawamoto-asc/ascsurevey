@@ -26,3 +26,14 @@ nav {
     width: 60px;
     text-align: right;
 }
+
+/* 一覧のテーブル用 */
+.srv_list th {
+    padding: 5px;
+    background-color:whitesmoke
+}
+
+.srv_list td {
+    padding-left: 5px;
+    padding-right: 5px;
+}
