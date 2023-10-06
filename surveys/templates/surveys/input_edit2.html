@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block main %}
+    <div>
+        <nav aria-label="breadcrumb" role="navigation">
+            <ol class="breadcrumb pt-3">
+                <li class="fs-5 breadcrumb-item active fw-bold" aria-current="page">{{ qsheet.title }}</li>
+                <li class="mt-1">（{{ qsheet.nendo }}）</li>
+            </ol>
+        </nav>
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="d-flex">
+                <div class="col-9"><pre>{{ qitem.content }}</pre></div>
+                <div class="col-3 text-end">
+                    <input class="ms-3 btn btn-info text-light"
+                        type="submit" name="btn_update" value="更新" onclick="return confirm('更新しますか？')">
+                    <a class="ms-3 me-3 btn btn-warning text-light" href="{% url 'input-list' qsheet.sheet_name %}">戻る</a>
+                </div>
+            </div>
+
+            <div>
+                <div>
+                    <input type="submit" value="追加" name="btn_add">
+                    <input type="submit" value="削除" name="btn_del" onclick="return confirm('チェック行を削除しますか？')">
+                </div>
+            </div>
+            <table class="table-bordered mt-2">
+                <tr>
+                    <th class="bg-light">削</th>
+                    <th class="bg-light">内容</th>
+                </tr>
+                {% for per_form in form  %}
+                    <tr>
+                        <td class="p-1 text-center">{{ per_form.ck_delete }}</td>
+                        <td class="p-1 text-center">{{ per_form.content }}</td>
+                    </tr>
+                {% endfor %}
+                {{ form.management_form }}
+            </table>
+        </form>
+    </div>
+{% endblock %}

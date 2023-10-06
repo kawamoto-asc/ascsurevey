@@ -3,7 +3,7 @@ from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.db.models import Q, Max
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, FormView
@@ -15,7 +15,6 @@ from pytz import timezone
 import openpyxl
 import pandas as pd
 import re
-import unicodedata
 
 FORM_NUM = 1        # フォーム数
 FORM_VALUES = {}    # 前回のform_setのPSOT値

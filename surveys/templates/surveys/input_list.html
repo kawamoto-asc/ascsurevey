@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block main %}
+    <nav aria-label="breadcrumb" role="navigation">
+        <ol class="breadcrumb pt-3">
+            <li class="fs-5 breadcrumb-item active fw-bold" aria-current="page">{{ qsheet.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="table-responsive" id="result-div">
+        <table class="table-bordered srv_list">
+            <thead class="sticky-top table-light">
+                <tr>
+                    <th>年度</th>
+                    <th></th>
+                    <th>登録日</th>
+                    <th>更新日</th>
+                </tr>
+            </thead>
+            <tbody class="table-light">
+            {% for sdat in object_list %}
+                <tr>
+                    <!--一問一答採点形式なら 状態を表示-->
+                    {% if qsheet.input_type == 1 %}
+                        <td>{{ sdat.nendo }}</td>
+                        <td>{{ sdat.status }}</td>
+                    <!--一問多答形式なら 登録件数を表示-->
+                    {% elif qsheet.input_type == 2 %}
+                        <td><a href="{% url 'input-edit2' sdat.nendo sdat.id %}">{{ sdat.nendo }}</a></td>
+                        <td>{{ sdat.entrycount }}</td>
+                    {% endif %}
+                    <td>{{ sdat.created_at|default_if_none:""|date:"Y/m/d H:i" }}</td>
+                    <td>{{ sdat.updated_at|default_if_none:""|date:"Y/m/d H:i" }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}
