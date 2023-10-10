@@ -1,7 +1,8 @@
 from django.conf import settings
 from django.db import models
 
-from .consts import MENU_KBN_CHOICES
+from sheets.models import Sheets, Items
+from surveys.consts import MENU_KBN_CHOICES
 
 # Create your models here.
 # Information
@@ -158,3 +159,62 @@ class CustomUser(models.Model):
 
     def __str__(self) -> str:
         return str(self.nendo) + '_' + self.user_id
+
+# 状態管理データ
+class Status(models.Model):
+    nendo = models.IntegerField('年度')
+    user_id = models.CharField('ユーザーID', max_length=128)
+    sheet_id = models.ForeignKey(Sheets, on_delete=models.DO_NOTHING, db_column='sheet_id')
+    status = models.IntegerField ('ステータス', blank=True, null=True)
+    score = models.FloatField('得点', blank=True, null=True)
+
+    created_by = models.CharField('作成者', max_length=128, blank=True, null=True)
+    update_by = models.CharField('更新者', max_length=128, blank=True, null=True)
+    created_at = models.DateTimeField('作成日', auto_now_add=True)
+    updated_at = models.DateTimeField('更新日', auto_now=True)
+
+    # ユニークキー設定
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+            fields = ['nendo', 'user_id', 'sheet_id'],
+            name = 'status_unique'
+            ),
+        ]
+
+    def __str__(self):
+        return str(self.nendo) + '_' + self.user_id + '_' + self.sheet_id
+
+    class Meta:
+        db_table = 'surveys_status'
+
+# 項目データ
+class Score(models.Model):
+    nendo = models.IntegerField('年度')
+    user_id = models.CharField('ユーザーID', max_length=128)
+    sheet_id = models.ForeignKey(Sheets, on_delete=models.DO_NOTHING, db_column='sheet_id')
+    item_id = models.ForeignKey(Items, on_delete=models.DO_NOTHING, db_column='item_id')
+    dsp_no = models.IntegerField('表示順')
+    inp_data = models.CharField('入力データ', max_length=512, blank=True, null=True)
+    score = models.FloatField('点数', blank=True, null=True)
+
+    created_by = models.CharField('作成者', max_length=128, blank=True, null=True)
+    update_by = models.CharField('更新者', max_length=128, blank=True, null=True)
+    created_at = models.DateTimeField('作成日', auto_now_add=True)
+    updated_at = models.DateTimeField('更新日', auto_now=True)
+
+    # ユニークキー設定
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+            fields = ['nendo', 'user_id', 'sheet_id', 'item_id', 'dsp_no'],
+            name = 'score_unique'
+            ),
+        ]
+
+    def __str__(self):
+        return str(self.nendo) + '_' + self.user_id + '_' + self.sheet_id + '_' + self.item_no
+
+    class Meta:
+        db_table = 'surveys_score'
+

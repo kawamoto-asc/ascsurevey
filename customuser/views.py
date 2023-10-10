@@ -325,14 +325,15 @@ def download_excel(request):
 
     # データ出力開始行
     row = 2
+    # 列数
+    col_max = 16
 
     # スタイルを取得
     cellstylelist = []
-    for i in range(16):
+    for i in range(col_max):
         cellstyle = ws.cell(row, (i+1))._style
         cellstylelist.append(cellstyle)
 
-    #ws.cell(2,1).value = "test"
     ulist = makeCustomUserList(request)
     for udat in ulist:
         # 値を設定
@@ -353,7 +354,7 @@ def download_excel(request):
         ws.cell(row, 15).value = udat.update_by
         ws.cell(row, 16).value = udat.updated_at.astimezone(timezone('Asia/Tokyo')).strftime('%Y/%m/%d %H:%M:%S')
         # スタイルを設定
-        for i in range(16):
+        for i in range(col_max):
             ws.cell(row, (i+1))._style = cellstylelist[i]
         row += 1
         

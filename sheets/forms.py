@@ -1,23 +1,39 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from sheets.consts import INPUT_TYPE_CHOICES
-import re
+from sheets.consts import INPUT_TYPE_CHOICES, FIELD_TYPE_CHOICES, AGGRE_TYPE_CHOICES
 
 # シートマスタメンテナンス 検索フォーム
 class SheetQueryForm(forms.Form):
     nendo = forms.ChoiceField(label='年度', required=True, disabled=False,)
 
 # シートマスタ 登録・編集フォーム
+# 追加ボタン押下時にエラーにしないようrequiredはFalse
 class SheetForm(forms.Form):
     nendo = forms.CharField(label='年度',
-        widget=forms.TextInput(attrs={'readonly': 'readonly', 'size': '3'}),
-        )
-    sheet_name = forms.CharField(label='シート名', required=True,)
-    title = forms.CharField(label='アンケート名', required=True,)
-    input_type = forms.ChoiceField(label='入力形式', choices=INPUT_TYPE_CHOICES, required=True,)
-    dsp_no = forms.IntegerField(
-        label='表示順', required=True,
         widget=forms.NumberInput(attrs={'class': 'ShortNumberInput'}),
+        )
+    sheet_name = forms.CharField(label='シート名', required=False,)
+    title = forms.CharField(label='アンケート名', required=False,)
+    dsp_no = forms.IntegerField(
+        label='表示順', required=False,
+        widget=forms.NumberInput(attrs={'class': 'ShortNumberInput'}),
+    )
+    input_type = forms.ChoiceField(label='入力形式', choices=INPUT_TYPE_CHOICES, required=False,)
+    aggre_type = forms.ChoiceField(label='集計タイプ', choices=AGGRE_TYPE_CHOICES, required=False,)
+    req_staff = forms.BooleanField(label='集計画面管理者権限要', required=False,)
+    remarks1 = forms.CharField(label='備考1', required=False,
+        widget=forms.Textarea(attrs={
+            'cols': 70,
+             'rows': 2,
+             'placeholder': '500文字',
+            })
+    )
+    remarks2 = forms.CharField(label='備考2', required=False,
+        widget=forms.Textarea(attrs={
+            'cols': 70,
+             'rows': 2,
+             'placeholder': '250文字',
+            })
     )
 
     def __init__(self, *args, **kwargs):
@@ -27,31 +43,34 @@ class SheetForm(forms.Form):
         self.sobj = kwargs.pop('sobj', None)
         super().__init__(*args, **kwargs)
 
-        # 年度はパラメータ値でリードオンリー
+        # 年度はパラメータ値
         nendo = self.pnendo
         self.fields['nendo'].initial = nendo
-        self.fields['nendo'].widget.attrs['readonly'] = 'readonly'
 
         # 編集モードの場合
         if self.mod == 'edit':
-            # シート名もリードオンリー
+            # 年度とシート名はリードオンリー
+            self.fields['nendo'].widget.attrs['readonly'] = 'readonly'
             self.fields['sheet_name'].widget.attrs['readonly'] = 'readonly'
 
-        '''
-            uobj = self.uobj
-            # ユーザ情報初期化
-            self.fields['busyo'].initial = uobj.busyo_id.bu_code
-            self.fields['location'].initial = uobj.location_id.location_code
-            self.fields['post'].initial = uobj.post_id.post_code
-            self.fields['user_id'].initial = uobj.user_id
-            self.fields['last_name'].initial = uobj.last_name
-            self.fields['first_name'].initial = uobj.first_name
-            self.fields['email'].initial = uobj.email
-            self.fields['is_staff'].initial = uobj.is_staff
-        '''
-            
+            sobj = self.sobj
+            # シート情報初期化
+            self.fields['sheet_name'].initial = sobj.sheet_name
+            self.fields['title'].initial = sobj.title
+            self.fields['dsp_no'].initial = sobj.dsp_no
+            self.fields['input_type'].initial = sobj.input_type
+            self.fields['aggre_type'].initial = sobj.aggre_type
+            self.fields['req_staff'].initial = sobj.req_staff
+            self.fields['remarks1'].initial = sobj.remarks1
+            self.fields['remarks2'].initial = sobj.remarks2
+           
 # カラムマスタ 登録・編集フォーム
+# 追加ボタン押下時にエラーにしないようrequiredはFalse
 class ItemForm(forms.Form):
+    ck_delete = forms.BooleanField(
+        label='削除',
+        widget=forms.CheckboxInput(attrs={'class': 'check'}),
+    )
     item_no = forms.IntegerField(
         label='項目No.', required=True,
         widget=forms.NumberInput(attrs={'class': 'ShortNumberInput'}),
@@ -61,16 +80,14 @@ class ItemForm(forms.Form):
         widget=forms.Textarea(attrs={
             'cols': 50,
              'rows': 3,
-             'placeholder': '300文字',
+             'placeholder': '500文字',
             })
     )
-    input_type = forms.ChoiceField(label='入力タイプ', choices=INPUT_TYPE_CHOICES,required=True,)
-    ck_delete = forms.BooleanField(
-        label='削除',
-        widget=forms.CheckboxInput(attrs={'class': 'check'}),
-    )
+    input_type = forms.ChoiceField(label='入力タイプ', choices=FIELD_TYPE_CHOICES,required=True,)
+    answer = forms.CharField(label='解答', required=False)
+    haiten = forms.CharField(label='配点', required=False)
 
-'''
+
 # Excel入力フォーム
 class FileUploadForm(forms.Form):
     file = forms.FileField(label='ファイル', required=True,)
@@ -81,4 +98,3 @@ class FileUploadForm(forms.Form):
         if not file.name.endswith('xlsx'):
             raise ValidationError('xlsxファイルを選択してください。')
         return file
-'''
