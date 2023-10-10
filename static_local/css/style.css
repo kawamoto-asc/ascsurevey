@@ -37,3 +37,12 @@ nav {
     padding-left: 5px;
     padding-right: 5px;
 }
+
+/* formsetのエラー表示用 */
+/* バリデーションエラーが自動でul liタグになってしまうので */
+.srv_formset_invalid ul {
+    list-style: none;
+}
+.srv_formset_invalid li {
+    line-height: 3px;
+}

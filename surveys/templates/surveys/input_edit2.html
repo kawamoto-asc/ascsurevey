@@ -20,6 +20,14 @@
                 </div>
             </div>
 
+            {% if form.errors %}
+                <div class="text-danger srv_formset_invalid">
+                    {% for serror in form.errors %}
+                        {{ serror }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <div class="text-success ps-3 pb-3">{{ message }}</div>
             <div>
                 <div>
                     <input type="submit" value="追加" name="btn_add">
