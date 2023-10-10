@@ -214,7 +214,6 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
 
         # 削除ボタン押下なら
         if 'btn_del' in request.POST:
-            #cnt_frm = 0
             to_cnt = 0
             del_cnt = 0
             newdic = {}
