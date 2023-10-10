@@ -93,3 +93,47 @@ function renewSelectList(pNendo, url, pListId) {
           alert('fetch エラーが発生しました。')
         })
 }
+
+// ログアウト、パスワード変更のドロップダウンリスト
+function dropDownList() {
+    document.addEventListener('DOMContentLoaded', function() {
+        var dropdowns = document.querySelectorAll('.js-dropdown');
+        var DURATION = 200; // アニメーションの速さ
+    
+        function fadeOutMenu() {
+            dropdowns.forEach(function(dropdown) {
+                dropdown.classList.remove('is-active');
+                var menu = dropdown.nextElementSibling;
+                if (menu && menu.classList.contains('js-dropdown-menu')) {
+                    menu.style.display = 'none';
+                }
+            });
+        }
+    
+        dropdowns.forEach(function(dropdown) {
+            dropdown.addEventListener('click', function() {
+                var self = this;
+                if (!self.classList.contains('is-active')) {
+                    fadeOutMenu();
+                }
+                self.classList.toggle('is-active');
+                var menu = self.nextElementSibling;
+                if (menu && menu.classList.contains('js-dropdown-menu')) {
+                    if (menu.style.display === 'none' || menu.style.display === '') {
+                        menu.style.display = 'block';
+                    } else {
+                        menu.style.display = 'none';
+                    }
+                }
+            });
+        });
+    
+        document.addEventListener('click', function(event) {
+            dropdowns.forEach(function(dropdown) {
+                if (!dropdown.contains(event.target)) {
+                    fadeOutMenu();
+                }
+            });
+        });
+    });
+}

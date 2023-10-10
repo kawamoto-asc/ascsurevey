@@ -15,7 +15,22 @@
 <body class="h-100">
     <header class="w-100 d-flex flex-row justify-content-between">
         <div class="fs-5 ps-3"><strong>ASC 社内汎用アンケートシステム</strong></div>
-        <div class="text-dark pe-3 pt-1">{{ request.user.last_name }}&nbsp;{{ request.user.first_name }}</div>
+        <div>
+            <ul class="header-munu-ul">
+                <li class="nav_item">
+                    <a href="#" class="menu-name js-dropdown">
+                        <i class="far fa-user-circle" style="margin-left:-10px;margin-right:10px"></i>
+                        <small>{{ request.user.last_name }}&nbsp;{{ request.user.first_name }}</small>
+                    </a>
+                  <div class="panel js-dropdown-menu">
+                    <ul class="panel-inner ps-0">
+                      <li class="panel_item"><a href="{% url 'logout' %}">ログアウト</a></li>
+                      <li class="panel_item"><a href="{% url 'password_change'%}">パスワード変更</a></li>
+                    </ul>
+                  </div>
+                </li>
+              </ul>
+        </div>
     </header>
     <div class="d-flex flex-row" style="height: calc(100% - 30px)">
         <nav class="bg-primary bg-opacity-75" id="sideMenu">
@@ -82,5 +97,6 @@
 </body>
 <script type="text/javascript">
     menuControl();
+    dropDownList();
 </script>
 </html>
