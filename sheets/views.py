@@ -129,7 +129,7 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
         return kwargs
 
     # ２個目のフォームを返す為のオーバーライド
-    '''
+    
     def get_context_data(self, **kwargs):
         print('get_context_data')
         # ２個目のフォームを渡す
@@ -139,7 +139,7 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
             'formset': self.form_class2(self.request.GET or None),
             })
 
-        return context'''
+        return context
 
     def post(self, request, *args, **kwargs):
         print('post')
