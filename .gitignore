@@ -160,6 +160,7 @@ cython_debug/
 #.idea/
 .gitignore
 migrations/
+static/
 ascsurevey/dbsettings.py
 # 仮想環境の除外
 env_3.11.4/
