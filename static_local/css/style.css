@@ -119,3 +119,66 @@ header .nav_item{
 .srv_formset_invalid li {
   line-height: 3px;
 }
+
+/* メニューリスト */
+a{
+    text-decoration: none;
+}
+header .header-munu-ul{
+  display: flex;
+  height: 30px;
+  list-style: none;
+}
+header li{
+  align-items: center;
+  justify-content: center;
+}
+header .menu-name{
+  color: #898a8e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  font-size: 20px;
+  font-weight: 600;
+}
+header .nav_item{
+    position: relative;
+}
+header .nav_item:hover{
+  background-color: rgb(230,230,230);
+}
+header .panel{
+  position: absolute;
+  top:32px;
+  left: 0;
+  right: 0;
+  margin: auto;
+  overflow: hidden;
+  width: 100%;
+  display: none;
+  background-color: white;
+  z-index: 100;
+  border-radius: 3px;
+  box-shadow: 0 0px 20px rgba(0,0,0,0.2);
+}
+header .panel_item{
+  display: block;
+  margin: 10px 10px;
+  font-size: 18px;
+}
+header .panel_item a{
+  color: #0099FF;
+  font-weight: 100;
+}
+header .panel_item a:hover{
+  text-decoration: underline;
+}
+header .nav_item{
+  display: block;
+  width: 170px;
+  text-align: center;
+}
+.is-active{
+  color: orange !important;
+}
