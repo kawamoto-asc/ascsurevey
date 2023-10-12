@@ -1,7 +1,7 @@
 from django.conf import settings
 from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.db.models import Q, Max
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -555,7 +555,11 @@ class SheetsEditView(LoginRequiredMixin, FormView):
                 return self.form_invalid(form)
             
             # データ保存
-            self.dataEntry(fsetwork)
+            self.dataEntry(form, fsetwork)
+            # 外部キーの紐付けで削除できないレコードがあれば
+            if form.non_field_errors():
+                return self.form_invalid(form)
+
             return redirect('/sheets?ini_flg=False')
         
         # 削除ボタン押下なら
@@ -600,93 +604,99 @@ class SheetsEditView(LoginRequiredMixin, FormView):
                     form.add_error(None, '配点に数値以外が入力されています。(' + str(i + 1) + '行目)')
 
     # データ保存処理
-    def dataEntry(self, frmdic):
-        with transaction.atomic():
-            nendo = self.kwargs['pnendo']
-            sheet_id=self.kwargs['id']
+    def dataEntry(self, form, frmdic):
+        ino = ""
+        try:
+            with transaction.atomic():
+                nendo = self.kwargs['pnendo']
+                sheet_id=self.kwargs['id']
 
-            # シート情報を保存
-            sheetdat = Sheets.objects.get(nendo=nendo, id=sheet_id)
-            sheetdat.title = frmdic['title']
-            # 表示順
-            dno = 1
-            if frmdic['dsp_no']:
-                # 入力があればその数値
-                dno = frmdic['dsp_no']
-            else:
-                # 入力がなくて登録レコードがあればMax＋1
-                rno = Sheets.objects.all().count()
-                if rno > 0:
-                    dno = Sheets.objects.all().aggregate(Max('dsp_no')) + 1
-            sheetdat.dsp_no = dno
-            sheetdat.input_type = frmdic['input_type']
-            sheetdat.aggre_type = frmdic['aggre_type']
-            sheetdat.remarks1 = frmdic['remarks1']
-            sheetdat.remarks2 = frmdic['remarks2']
-            rstaff = False
-            if 'req_staff' in frmdic:
-                rstaff = True
-            sheetdat.req_staff = rstaff
-
-            sheetdat.update_by = self.request.user.username
-            sheetdat.save()
-
-            # 項目情報保存
-            ino_list = []
-            for i in range(FORM_NUM):
-                itemno = frmdic['form-' + str(i) + '-item_no']
-                ino_list.append(itemno)
-                # あれば更新、なければ登録
-                if Items.objects.filter(nendo=nendo, sheet_id=sheet_id, item_no=itemno).exists():
-                    itemdat = Items.objects.get(nendo=nendo, sheet_id=sheet_id, item_no=itemno)
+                # シート情報を保存
+                sheetdat = Sheets.objects.get(nendo=nendo, id=sheet_id)
+                sheetdat.title = frmdic['title']
+                # 表示順
+                dno = 1
+                if frmdic['dsp_no']:
+                    # 入力があればその数値
+                    dno = frmdic['dsp_no']
                 else:
-                    itemdat = Items()
-                    itemdat.nendo = nendo
-                    itemdat.sheet_id = sheetdat
-                    itemdat.item_no = itemno
-                itemdat.content = frmdic['form-' + str(i) + '-content']
-                itemdat.input_type = frmdic['form-' + str(i) + '-input_type']
-                itemdat.answer = frmdic['form-' + str(i) + '-answer']
-                if frmdic['form-' + str(i) + '-haiten']:
-                    itemdat.haiten = float(frmdic['form-' + str(i) + '-haiten'])
-                itemdat.created_by = self.request.user.username
-                itemdat.save()
+                    # 入力がなくて登録レコードがあればMax＋1
+                    rno = Sheets.objects.all().count()
+                    if rno > 0:
+                        dno = Sheets.objects.all().aggregate(Max('dsp_no')) + 1
+                sheetdat.dsp_no = dno
+                sheetdat.input_type = frmdic['input_type']
+                sheetdat.aggre_type = frmdic['aggre_type']
+                sheetdat.remarks1 = frmdic['remarks1']
+                sheetdat.remarks2 = frmdic['remarks2']
+                rstaff = False
+                if 'req_staff' in frmdic:
+                    rstaff = True
+                sheetdat.req_staff = rstaff
 
-            # 削除された項目があれば削除
-            iobj = Items.objects.filter(nendo=nendo, sheet_id=sheet_id)
-            for idat in iobj:
-                if ino_list.count(str(idat.item_no)) < 1:
-                    idat.delete()
+                sheetdat.update_by = self.request.user.username
+                sheetdat.save()
 
-            # メニューへの更新
-            inpurl = INPUT_URL + frmdic['sheet_name']
-            sumurl = SUM_URL + frmdic['sheet_name']
+                # 項目情報保存
+                ino_list = []
+                for i in range(FORM_NUM):
+                    itemno = frmdic['form-' + str(i) + '-item_no']
+                    ino_list.append(itemno)
+                    # あれば更新、なければ登録
+                    if Items.objects.filter(nendo=nendo, sheet_id=sheet_id, item_no=itemno).exists():
+                        itemdat = Items.objects.get(nendo=nendo, sheet_id=sheet_id, item_no=itemno)
+                    else:
+                        itemdat = Items()
+                        itemdat.nendo = nendo
+                        itemdat.sheet_id = sheetdat
+                        itemdat.item_no = itemno
+                    itemdat.content = frmdic['form-' + str(i) + '-content']
+                    itemdat.input_type = frmdic['form-' + str(i) + '-input_type']
+                    itemdat.answer = frmdic['form-' + str(i) + '-answer']
+                    if frmdic['form-' + str(i) + '-haiten']:
+                        itemdat.haiten = float(frmdic['form-' + str(i) + '-haiten'])
+                    itemdat.created_by = self.request.user.username
+                    itemdat.save()
 
-            # 入力画面のURLの登録があれば
-            imenu = Menu.objects.filter(
-                        url = inpurl,
-                ).exists()
-            if imenu:
-                imenudat = Menu.objects.get(url=inpurl)
-                imenudat.title = frmdic['title']
-                imenudat.kbn = 1
-                imenudat.dsp_no = dno
-                imenudat.req_staff = False
-                imenudat.update_by = self.request.user.username
-                imenudat.save()
+                # 削除された項目があれば削除
+                iobj = Items.objects.filter(nendo=nendo, sheet_id=sheet_id)
+                for idat in iobj:
+                    if ino_list.count(str(idat.item_no)) < 1:
+                        ino = str(idat.item_no) # 紐付けで削除されない例外発生時のメッセージ用
+                        idat.delete()
 
-            # 集計画面のURLの登録があれば
-            amenu = Menu.objects.filter(
-                        url = sumurl,
-                ).exists()
-            if amenu:
-                amenudat = Menu.objects.get(url=sumurl)
-                amenudat.title = frmdic['title'] + ' 集計'
-                amenudat.kbn = 2
-                amenudat.dsp_no = dno
-                amenudat.req_staff = rstaff
-                amenudat.update_by = self.request.user.username
-                amenudat.save()
+                # メニューへの更新
+                inpurl = INPUT_URL + frmdic['sheet_name']
+                sumurl = SUM_URL + frmdic['sheet_name']
+
+                # 入力画面のURLの登録があれば
+                imenu = Menu.objects.filter(
+                            url = inpurl,
+                    ).exists()
+                if imenu:
+                    imenudat = Menu.objects.get(url=inpurl)
+                    imenudat.title = frmdic['title']
+                    imenudat.kbn = 1
+                    imenudat.dsp_no = dno
+                    imenudat.req_staff = False
+                    imenudat.update_by = self.request.user.username
+                    imenudat.save()
+
+                # 集計画面のURLの登録があれば
+                amenu = Menu.objects.filter(
+                            url = sumurl,
+                    ).exists()
+                if amenu:
+                    amenudat = Menu.objects.get(url=sumurl)
+                    amenudat.title = frmdic['title'] + ' 集計'
+                    amenudat.kbn = 2
+                    amenudat.dsp_no = dno
+                    amenudat.req_staff = rstaff
+                    amenudat.update_by = self.request.user.username
+                    amenudat.save()
+
+        except IntegrityError as e:
+            form.add_error(None, '項目No.' + ino + ' は紐付けられているデータがある為削除できません。')
 
     # データ削除処理
     def dataDelete(self):
@@ -985,98 +995,113 @@ class SheetFileUploadView(LoginRequiredMixin, FormView):
             else:
                 chk_dspno = 1
 
-        with transaction.atomic():
-            # シートマスタにあれば更新、なければ登録
-            if Sheets.objects.filter(nendo=chk_nendo, sheet_name=chk_sname).exists():
-                sheetdat = Sheets.objects.get(nendo=chk_nendo, sheet_name=chk_sname)
-                sheetdat.update_by = self.request.user.username
-            else:
-                sheetdat = Sheets()
-                sheetdat.nendo = chk_nendo
-                sheetdat.created_by = self.request.user.username
-
-            sheetdat.sheet_name = chk_sname
-            sheetdat.title = chk_aname
-            sheetdat.dsp_no = chk_dspno
-            sheetdat.input_type = chk_itype
-            sheetdat.aggre_type = chk_atype
-            sheetdat.req_staff = reg_staff
-            sheetdat.remarks1 = chk_rmks1
-            sheetdat.remarks2 = chk_rmks2
-            sheetdat.save()
-
-            # メニューマスタに登録があれば更新、なければ登録
-            inpurl = INPUT_URL + chk_sname
-            sumurl = SUM_URL + chk_sname
-
-            # 入力画面のURL
-            imenu = Menu.objects.filter(
-                        url = inpurl,
-                ).exists()
-            if imenu:
-                imenudat = Menu.objects.get(url=inpurl)
-                imenudat.update_by = self.request.user.username
-            else:
-                imenudat = Menu()
-                imenudat.url = inpurl
-                imenudat.created_by = self.request.user.username
-            imenudat.title = chk_aname
-            imenudat.kbn = 1
-            imenudat.dsp_no = chk_dspno
-            imenudat.req_staff = False
-            imenudat.save()
-
-            # 集計画面のURL
-            amenu = Menu.objects.filter(
-                        url = sumurl,
-                ).exists()
-            if amenu:
-                amenudat = Menu.objects.get(url=sumurl)
-                amenudat.update_by = self.request.user.username
-            else:
-                amenudat = Menu()
-                amenudat.url = sumurl
-                amenudat.created_by = self.request.user.username
-            amenudat.title = chk_aname + ' 集計'
-            amenudat.kbn = 2
-            amenudat.dsp_no = chk_dspno
-            amenudat.req_staff = reg_staff
-            amenudat.save()
-
-            # 項目マスタ保存
-            ino_list = []
-            sheet = Sheets.objects.get(nendo=chk_nendo, sheet_name=chk_sname)
-            # あれば更新、なければ登録
-            for i in range(df.shape[0]) :
-                ldat = df.iloc[i]
-
-                item_no = int(float(ldat['項目No.']))
-                content = ldat['内容']
-                input_type = ldat['入力タイプ']
-                answer = ldat['解答']
-                haiten = str(ldat['配点'])
-
-                ino_list.append(item_no)
-
-                if Items.objects.filter(nendo=chk_nendo, sheet_id=sheet, item_no=item_no).exists():
-                    item = Items.objects.get(nendo=chk_nendo, sheet_id=sheet, item_no=item_no)
+        # 保存処理
+        ino = ""
+        try:
+            with transaction.atomic():
+                # シートマスタにあれば更新、なければ登録
+                if Sheets.objects.filter(nendo=chk_nendo, sheet_name=chk_sname).exists():
+                    sheetdat = Sheets.objects.get(nendo=chk_nendo, sheet_name=chk_sname)
+                    sheetdat.update_by = self.request.user.username
                 else:
-                    item = Items()
-                    item.nendo = chk_nendo
-                    item.sheet_id = sheet
-                    item.item_no = item_no
-                item.content = content
-                item.input_type = input_type
-                item.answer = answer
-                if haiten != 'nan':
-                    item.haiten = float(haiten)
-                item.created_by = self.request.user.username
-                item.save()
+                    sheetdat = Sheets()
+                    sheetdat.nendo = chk_nendo
+                    sheetdat.created_by = self.request.user.username
 
-            # 削除された項目があれば削除
-            iobj = Items.objects.filter(nendo=chk_nendo, sheet_id=sheet)
-            for idat in iobj:
-                if ino_list.count(idat.item_no) < 1:
-                    idat.delete()
+                sheetdat.sheet_name = chk_sname
+                sheetdat.title = chk_aname
+                sheetdat.dsp_no = chk_dspno
+                sheetdat.input_type = chk_itype
+                sheetdat.aggre_type = chk_atype
+                sheetdat.req_staff = reg_staff
+                sheetdat.remarks1 = chk_rmks1
+                sheetdat.remarks2 = chk_rmks2
+                sheetdat.save()
+
+                # メニューマスタに登録があれば更新、なければ登録
+                inpurl = INPUT_URL + chk_sname
+                sumurl = SUM_URL + chk_sname
+
+                # 入力画面のURL
+                imenu = Menu.objects.filter(
+                            url = inpurl,
+                    ).exists()
+                if imenu:
+                    imenudat = Menu.objects.get(url=inpurl)
+                    imenudat.update_by = self.request.user.username
+                else:
+                    imenudat = Menu()
+                    imenudat.url = inpurl
+                    imenudat.created_by = self.request.user.username
+                imenudat.title = chk_aname
+                imenudat.kbn = 1
+                imenudat.dsp_no = chk_dspno
+                imenudat.req_staff = False
+                imenudat.save()
+
+                # 集計画面のURL
+                amenu = Menu.objects.filter(
+                            url = sumurl,
+                    ).exists()
+                if amenu:
+                    amenudat = Menu.objects.get(url=sumurl)
+                    amenudat.update_by = self.request.user.username
+                else:
+                    amenudat = Menu()
+                    amenudat.url = sumurl
+                    amenudat.created_by = self.request.user.username
+                amenudat.title = chk_aname + ' 集計'
+                amenudat.kbn = 2
+                amenudat.dsp_no = chk_dspno
+                amenudat.req_staff = reg_staff
+                amenudat.save()
+
+                # 項目マスタ保存
+                ino_list = []
+                sheet = Sheets.objects.get(nendo=chk_nendo, sheet_name=chk_sname)
+                # あれば更新、なければ登録
+                for i in range(df.shape[0]) :
+                    ldat = df.iloc[i]
+
+                    item_no = int(float(ldat['項目No.']))
+                    content = ldat['内容']
+                    input_type = ldat['入力タイプ']
+                    answer = ldat['解答']
+                    if type(answer) is not str:
+                        answer = str(answer)
+                    haiten = str(ldat['配点'])
+
+                    ino_list.append(item_no)
+
+                    if Items.objects.filter(nendo=chk_nendo, sheet_id=sheet, item_no=item_no).exists():
+                        item = Items.objects.get(nendo=chk_nendo, sheet_id=sheet, item_no=item_no)
+                    else:
+                        item = Items()
+                        item.nendo = chk_nendo
+                        item.sheet_id = sheet
+                        item.item_no = item_no
+                    item.content = content
+                    item.input_type = input_type
+                    if answer == 'nan':
+                        item.answer = None
+                    else:
+                        item.answer = answer
+                    if haiten == 'nan':
+                        item.haiten = None
+                    else:
+                        item.haiten = float(haiten)
+                    item.created_by = self.request.user.username
+                    item.save()
+
+                # 削除された項目があれば削除
+                iobj = Items.objects.filter(nendo=chk_nendo, sheet_id=sheet)
+                for idat in iobj:
+                    if ino_list.count(idat.item_no) < 1:
+                        ino = str(idat.item_no)
+                        idat.delete()
+
+        except IntegrityError as e:
+            form.add_error(None, '項目No.' + ino + ' は紐付けられているデータがある為削除できません。')
+            return super().form_invalid(form)
 
         return super().form_valid(form)
