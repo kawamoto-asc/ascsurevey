@@ -20,7 +20,7 @@ AGGRE_TYPE_CHOICES = (
 INPUT_URL = '/ascsurvey/input/'
 
 # アンケート集約画面URL
-SUM_URL = '/ascsurvey/summarize/'
+SUM_URL = '/summarize/'
 
 # 入力項目
 SELECT_CHOICES01 = (

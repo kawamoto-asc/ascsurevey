@@ -163,3 +163,4 @@ ascsurevey/dbsettings.py
 
 # マイグレーションフォルダも管理外に
 migrations/
+__init__.py

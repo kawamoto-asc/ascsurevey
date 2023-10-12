@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'surveys.apps.SurveysConfig',
     'customuser.apps.CustomuserConfig',
     'sheets.apps.SheetsConfig',
+    'summarize.apps.SummarizeConfig',
 ]
 
 MIDDLEWARE = [
