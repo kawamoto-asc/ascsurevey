@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, FormView
-from sheets.consts import INPUT_TYPE_CHOICES, FIELD_TYPE_CHOICES, AGGRE_TYPE_CHOICES, INPUT_URL, AGGRE_URL
+from sheets.consts import INPUT_TYPE_CHOICES, FIELD_TYPE_CHOICES, AGGRE_TYPE_CHOICES, INPUT_URL, SUM_URL
 from sheets.models import Sheets, Items
 from sheets.forms import SheetQueryForm, SheetForm, ItemForm, FileUploadForm
 from surveys.models import Ujf, Menu
@@ -363,7 +363,7 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
 
             # メニューへの登録
             inpurl = INPUT_URL + frmdic['sheet_name']
-            aggurl = AGGRE_URL + frmdic['sheet_name']
+            sumurl = SUM_URL + frmdic['sheet_name']
 
             # 入力画面のURLの登録がなければ
             imenu = Menu.objects.filter(
@@ -381,12 +381,12 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
 
             # 集計画面のURLの登録がなければ
             amenu = Menu.objects.filter(
-                        url = aggurl,
+                        url = sumurl,
                 ).exists()
             if not amenu:
                 amenudat = Menu()
                 amenudat.title = frmdic['title'] + ' 集計'
-                amenudat.url = aggurl
+                amenudat.url = sumurl
                 amenudat.kbn = 2
                 amenudat.dsp_no = dno
                 amenudat.req_staff = rstaff
@@ -631,14 +631,19 @@ class SheetsEditView(LoginRequiredMixin, FormView):
             sheetdat.update_by = self.request.user.username
             sheetdat.save()
 
-            # 項目情報保存 delete&Insert
-            items = Items.objects.filter(nendo=nendo, sheet_id=sheet_id)
-            items.delete()
+            # 項目情報保存
+            ino_list = []
             for i in range(FORM_NUM):
-                itemdat = Items()
-                itemdat.nendo = nendo
-                itemdat.sheet_id = sheetdat
-                itemdat.item_no = frmdic['form-' + str(i) + '-item_no']
+                itemno = frmdic['form-' + str(i) + '-item_no']
+                ino_list.append(itemno)
+                # あれば更新、なければ登録
+                if Items.objects.filter(nendo=nendo, sheet_id=sheet_id, item_no=itemno).exists():
+                    itemdat = Items.objects.get(nendo=nendo, sheet_id=sheet_id, item_no=itemno)
+                else:
+                    itemdat = Items()
+                    itemdat.nendo = nendo
+                    itemdat.sheet_id = sheetdat
+                    itemdat.item_no = itemno
                 itemdat.content = frmdic['form-' + str(i) + '-content']
                 itemdat.input_type = frmdic['form-' + str(i) + '-input_type']
                 itemdat.answer = frmdic['form-' + str(i) + '-answer']
@@ -647,9 +652,15 @@ class SheetsEditView(LoginRequiredMixin, FormView):
                 itemdat.created_by = self.request.user.username
                 itemdat.save()
 
+            # 削除された項目があれば削除
+            iobj = Items.objects.filter(nendo=nendo, sheet_id=sheet_id)
+            for idat in iobj:
+                if ino_list.count(str(idat.item_no)) < 1:
+                    idat.delete()
+
             # メニューへの更新
             inpurl = INPUT_URL + frmdic['sheet_name']
-            aggurl = AGGRE_URL + frmdic['sheet_name']
+            sumurl = SUM_URL + frmdic['sheet_name']
 
             # 入力画面のURLの登録があれば
             imenu = Menu.objects.filter(
@@ -666,10 +677,10 @@ class SheetsEditView(LoginRequiredMixin, FormView):
 
             # 集計画面のURLの登録があれば
             amenu = Menu.objects.filter(
-                        url = aggurl,
+                        url = sumurl,
                 ).exists()
             if amenu:
-                amenudat = Menu.objects.get(url=aggurl)
+                amenudat = Menu.objects.get(url=sumurl)
                 amenudat.title = frmdic['title'] + ' 集計'
                 amenudat.kbn = 2
                 amenudat.dsp_no = dno
@@ -708,7 +719,7 @@ def SheetsDownloadExcel(request, pnendo, id):
         cellstylelist.append(cellstyle)
 
     sheet = Sheets.objects.get(id=id)
-    itemlist = Items.objects.filter(nendo=pnendo, sheet_id=sheet)
+    itemlist = Items.objects.filter(nendo=pnendo, sheet_id=sheet).order_by('item_no')
 
     # セレクトボックス値からのdicを作成
     ityp_dic = {}
@@ -996,7 +1007,7 @@ class SheetFileUploadView(LoginRequiredMixin, FormView):
 
             # メニューマスタに登録があれば更新、なければ登録
             inpurl = INPUT_URL + chk_sname
-            aggurl = AGGRE_URL + chk_sname
+            sumurl = SUM_URL + chk_sname
 
             # 入力画面のURL
             imenu = Menu.objects.filter(
@@ -1017,14 +1028,14 @@ class SheetFileUploadView(LoginRequiredMixin, FormView):
 
             # 集計画面のURL
             amenu = Menu.objects.filter(
-                        url = aggurl,
+                        url = sumurl,
                 ).exists()
             if amenu:
-                amenudat = Menu.objects.get(url=aggurl)
+                amenudat = Menu.objects.get(url=sumurl)
                 amenudat.update_by = self.request.user.username
             else:
                 amenudat = Menu()
-                amenudat.url = aggurl
+                amenudat.url = sumurl
                 amenudat.created_by = self.request.user.username
             amenudat.title = chk_aname + ' 集計'
             amenudat.kbn = 2
@@ -1032,11 +1043,10 @@ class SheetFileUploadView(LoginRequiredMixin, FormView):
             amenudat.req_staff = reg_staff
             amenudat.save()
 
-            # 項目マスタはファイルからdelete&Insert
+            # 項目マスタ保存
+            ino_list = []
             sheet = Sheets.objects.get(nendo=chk_nendo, sheet_name=chk_sname)
-            if Items.objects.filter(nendo=chk_nendo, sheet_id=sheet).exists():
-                Items.objects.filter(nendo=chk_nendo, sheet_id=sheet).delete()
-
+            # あれば更新、なければ登録
             for i in range(df.shape[0]) :
                 ldat = df.iloc[i]
 
@@ -1046,10 +1056,15 @@ class SheetFileUploadView(LoginRequiredMixin, FormView):
                 answer = ldat['解答']
                 haiten = str(ldat['配点'])
 
-                item = Items()
-                item.nendo = chk_nendo
-                item.sheet_id = sheet
-                item.item_no = item_no
+                ino_list.append(item_no)
+
+                if Items.objects.filter(nendo=chk_nendo, sheet_id=sheet, item_no=item_no).exists():
+                    item = Items.objects.get(nendo=chk_nendo, sheet_id=sheet, item_no=item_no)
+                else:
+                    item = Items()
+                    item.nendo = chk_nendo
+                    item.sheet_id = sheet
+                    item.item_no = item_no
                 item.content = content
                 item.input_type = input_type
                 item.answer = answer
@@ -1057,5 +1072,11 @@ class SheetFileUploadView(LoginRequiredMixin, FormView):
                     item.haiten = float(haiten)
                 item.created_by = self.request.user.username
                 item.save()
+
+            # 削除された項目があれば削除
+            iobj = Items.objects.filter(nendo=chk_nendo, sheet_id=sheet)
+            for idat in iobj:
+                if ino_list.count(idat.item_no) < 1:
+                    idat.delete()
 
         return super().form_valid(form)
