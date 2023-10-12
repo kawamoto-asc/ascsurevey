@@ -25,7 +25,8 @@ SECRET_KEY = 'django-insecure-0!8ffvxji2(x%xy2ere8u=5t!_3oy_0!(rh0%t@k%%_xvh^sl^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost','192.168.8.240']
+ALLOWED_HOSTS = ['127.0.0.1','192.168.8.240']
+
 
 # Application definition
 
@@ -43,6 +44,7 @@ INSTALLED_APPS = [
     'surveys.apps.SurveysConfig',
     'customuser.apps.CustomuserConfig',
     'sheets.apps.SheetsConfig',
+    'summarize.apps.SummarizeConfig',
 ]
 
 MIDDLEWARE = [

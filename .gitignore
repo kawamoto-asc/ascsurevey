@@ -166,3 +166,7 @@ ascsurevey/dbsettings.py
 env_3.11.4/
 ascsurvey/wsgi.py
 __init__.py
+
+# マイグレーションフォルダも管理外に
+migrations/
+__init__.py
