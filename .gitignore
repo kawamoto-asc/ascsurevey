@@ -165,3 +165,4 @@ ascsurevey/dbsettings.py
 # 仮想環境の除外
 env_3.11.4/
 ascsurvey/wsgi.py
+__init__.py
