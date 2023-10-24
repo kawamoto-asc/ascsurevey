@@ -27,6 +27,26 @@ nav {
     text-align: right;
 }
 
+/* 一覧のテーブル用 */
+.srv_list th {
+  padding: 5px;
+  background-color:whitesmoke
+}
+
+.srv_list td {
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+/* formsetのエラー表示用 */
+/* バリデーションエラーが自動でul liタグになってしまうので */
+.srv_formset_invalid ul {
+  list-style: none;
+}
+.srv_formset_invalid li {
+  line-height: 3px;
+}
+
 /* メニューリスト */
 a{
     text-decoration: none;
@@ -88,24 +108,4 @@ header .nav_item{
 }
 .is-active{
   color: orange !important;
-}
-
-/* 一覧のテーブル用 */
-.srv_list th {
-  padding: 5px;
-  background-color:whitesmoke
-}
-
-.srv_list td {
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-/* formsetのエラー表示用 */
-/* バリデーションエラーが自動でul liタグになってしまうので */
-.srv_formset_invalid ul {
-  list-style: none;
-}
-.srv_formset_invalid li {
-  line-height: 3px;
 }

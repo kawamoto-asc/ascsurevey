@@ -19,8 +19,8 @@ AGGRE_TYPE_CHOICES = (
 # アンケート入力画面URL
 INPUT_URL = '/ascsurvey/input/'
 
-# アンケート集計画面URL
-AGGRE_URL = '/ascsurvey/aggregate/'
+# アンケート集約画面URL
+SUM_URL = '/summarize/'
 
 # 入力項目
 SELECT_CHOICES01 = (
