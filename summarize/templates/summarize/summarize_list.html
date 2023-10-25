@@ -1,6 +1,32 @@
 {% extends "base.html" %}
 
 {% block main %}
-    集計ページです~
+    <div>
+        <nav aria-label="breadcrumb" role="navigation">
+            <ol class="breadcrumb pt-3">
+                <li class="fs-5 breadcrumb-item active fw-bold" aria-current="page">{{ qsheet.title }}</li>
+            </ol>
+        </nav>
+
+        <form method="POST">
+            {% csrf_token %}
+            <table>
+                <tr>
+                    <th class="pe-1">{{ query_form.nendo.label }}</th>
+                    <td class="pe-3">{{ query_form.nendo }}</td>
+                    <th class="pe-1">{{ query_form.busyo.label }}</th>
+                    <td class="pe-3">{{ query_form.busyo }}</td>
+                    <th class="pe-1">{{ query_form.location.label }}</th>
+                    <td class="pe-3">{{ query_form.location }}</td>
+                    <th class="pe-1">{{ query_form.post.label }}</th>
+                    <td class="pe-3">{{ query_form.post }}</td>
+                    <td class="pe-3 d-none">{{ query_form.shname }}</td>
+                    <td class="ps-3">
+                        <input class="btn btn-primary" type="submit" value="検索">
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
 
 {% endblock %}
