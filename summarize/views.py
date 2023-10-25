@@ -1,6 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
+from sheets.consts import MSUM_STR
 from django.shortcuts import render
 from django.views.generic import ListView
 
@@ -73,6 +74,7 @@ class SummarizeListView(LoginRequiredMixin, ListView):
         # シート情報を渡す
         qsheet = Sheets.objects.filter(sheet_name=self.kwargs['pshname'],).order_by('-nendo')
         context['qsheet'] = qsheet[0]
+        context['subtitle'] = MSUM_STR
 
         # 年度リスト作成
         nendo_items = Items.objects.values_list('nendo')

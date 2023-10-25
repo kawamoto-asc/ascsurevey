@@ -22,6 +22,9 @@ INPUT_URL = '/ascsurvey/input/'
 # アンケート集約画面URL
 SUM_URL = '/summarize/'
 
+# 集約画面サブタイトル
+MSUM_STR = '照会'
+
 # 入力項目
 SELECT_CHOICES01 = (
     ('〇', '〇'),

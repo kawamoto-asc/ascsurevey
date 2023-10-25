@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, FormView
-from sheets.consts import INPUT_TYPE_CHOICES, FIELD_TYPE_CHOICES, AGGRE_TYPE_CHOICES, INPUT_URL, SUM_URL
+from sheets.consts import INPUT_TYPE_CHOICES, FIELD_TYPE_CHOICES, AGGRE_TYPE_CHOICES, INPUT_URL, SUM_URL, MSUM_STR
 from sheets.models import Sheets, Items
 from sheets.forms import SheetQueryForm, SheetForm, ItemForm, FileUploadForm
 from surveys.models import Ujf, Menu
@@ -385,7 +385,7 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
                 ).exists()
             if not amenu:
                 amenudat = Menu()
-                amenudat.title = frmdic['title'] + ' 集計'
+                amenudat.title = frmdic['title'] + ' ' + MSUM_STR
                 amenudat.url = sumurl
                 amenudat.kbn = 2
                 amenudat.dsp_no = dno
@@ -688,7 +688,7 @@ class SheetsEditView(LoginRequiredMixin, FormView):
                     ).exists()
                 if amenu:
                     amenudat = Menu.objects.get(url=sumurl)
-                    amenudat.title = frmdic['title'] + ' 集計'
+                    amenudat.title = frmdic['title'] + ' ' + MSUM_STR
                     amenudat.kbn = 2
                     amenudat.dsp_no = dno
                     amenudat.req_staff = rstaff
