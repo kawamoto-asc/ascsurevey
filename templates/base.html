@@ -33,55 +33,63 @@
         </div>
     </header>
     <div class="d-flex flex-row" style="height: calc(100% - 30px)">
-        <nav class="bg-primary bg-opacity-75" id="sideMenu">
-            <ul class="nav flex-column m-0 p-3">
-                <li class="nav-item"><a href="/ascsurvey" class="nav-link">ＨＯＭＥ</a></li>
-                <li class="nav-item text-light menu_hr"></li>
-                <!--スタッフ権限があるユーザの場合-->
-                {% if request.user.is_staff %}
-                    {% for imenu_dat in imenu %}
-                        <li class="nav-item"><a href="{{ imenu_dat.url }}" class="nav-link">{{ imenu_dat.title }}</a></li>
-                    {% endfor %}
-                    {% if skttl_count > 0 %}
-                        <li class="nav-item text-light menu_hr"></li>
-                    {% endif %}
-                    {% for tmenu_dat in tmenu %}
-                        <li class="nav-item"><a href="{{ tmenu_dat.url }}" class="nav-link">{{ tmenu_dat.title }}</a></li>
-                    {% endfor %}
-                    <li class="nav-item text-white menu_hr"></li>
-                    <li class="nav-item"><a href="/sheets/" class="nav-link">シートマスタメンテナンス</a></li>
-                    {% for amenu_dat in amenu %}
-                        <li class="nav-item"><a href="{{ amenu_dat.url }}" class="nav-link">{{ amenu_dat.title }}</a></li>
-                    {% endfor %}
-                <!--一般権限のユーザの場合-->
-                {% else %}
-                    {% for imenu_dat in imenu %}
-                        {% if imenu_dat.req_staff == False %}
-                            <li class="nav-item"><a href="{{ imenu_dat.url }}" class="nav-link">{{ imenu_dat.title }}</a></li>
-                        {% endif %}
-                    {% endfor %}
-                    {% if skgene_count > 0 %}
-                        <li class="nav-item text-light menu_hr"></li>
-                    {% endif %}
-                    {% for tmenu_dat in tmenu %}
-                        {% if tmenu_dat.req_staff == False %}
-                            <li class="nav-item"><a href="{{ tmenu_dat.url }}" class="nav-link">{{ tmenu_dat.title }}</a></li>
-                        {% endif %}
-                    {% endfor %}
-                {% endif %}
-                <!--スーパーユーザ権限がある場合-->
-                {% if request.user.is_superuser %}
-                    <li class="nav-item"><a href="/customusers/" class="nav-link">ユーザーマスタメンテナンス</a></li>
-                {% endif %}
-            </ul>
-        </nav>
         <div class="w-100">
-            <div class="border shadow-sm d-flex flex-row bg-primary bg-opacity-10 justify-content-between">
+            <div class="border shadow-sm d-flex flex-row bg-primary bg-opacity-75 justify-content-between">
                 <div class="d-flex flex-row align-items-center">
-                    <div class="navbar-brand toggle-menu">
-                        <button class="btn bi bi-justify" id="toggle" style="font-size:1.5em"></button>
+                    <!-- HOME -->
+                    <div class="dropdown mx-3">
+                        <a class="text-light" href="/ascsurvey" role="button">HOME</a>
                     </div>
-                    <div class="fs-5">Dashboard</div>
+                    <!-- アンケート回答 -->
+                    <div class="dropdown">
+                        <button class="btn dropdown text-light" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            アンケート回答
+                        </button>
+                        <ul class="dropdown-menu bg-primary" aria-labelledby="dropdownMenuButton">
+                            {% for imenu_dat in imenu %}
+                            <li class="nav-item"><a href="{{ imenu_dat.url }}" class="nav-link">{{ imenu_dat.title }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <!-- アンケート集計 -->
+                    <div class="dropdown">
+                        <button class="btn dropdown text-light" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            アンケート集計
+                        </button>
+                        <!--スタッフ権限があるユーザの場合 全件表示-->
+                        {% if request.user.is_staff %}
+                            <ul class="dropdown-menu bg-primary" aria-labelledby="dropdownMenuButton">
+                                {% for tmenu_dat in tmenu %}
+                                    <li class="nav-item"><a href="{{ tmenu_dat.url }}" class="nav-link">{{ tmenu_dat.title }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        <!--一般権限のユーザの場合 スタッフ権限が必要ないもののみ表示-->
+                        {% else %}
+                            <ul class="dropdown-menu bg-primary" aria-labelledby="dropdownMenuButton">
+                                {% for tmenu_dat in tmenu %}
+                                    {% if tmenu_dat.req_staff == False %}
+                                        <li class="nav-item"><a href="{{ tmenu_dat.url }}" class="nav-link">{{ tmenu_dat.title }}</a></li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    <!-- マスタメンテ -->
+                    <!-- 一般ユーザは利用不可 -->
+                    {% if request.user.is_staff or request.user.is_superuser %}
+                        <div class="dropdown">
+                            <button class="btn dropdown text-light" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                マスタメンテ
+                            </button>
+                            <ul class="dropdown-menu bg-primary" aria-labelledby="dropdownMenuButton">
+                                <li class="nav-item"><a href="/sheets/" class="nav-link">シートマスタメンテナンス</a></li>
+                                <!-- スーパーユーザのみユーザマスタメンテナンス利用可 -->
+                                {% if request.user.is_superuser %}
+                                    <li class="nav-item"><a href="/customusers/" class="nav-link">ユーザーマスタメンテナンス</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
             <main>
@@ -93,7 +101,6 @@
     </div>
 </body>
 <script type="text/javascript">
-    menuControl();
     dropDownList();
 </script>
 </html>
