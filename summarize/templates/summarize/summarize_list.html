@@ -57,7 +57,7 @@
                                 <td>{{ scdat.user_id.busyo_id.bu_name }}</td>
                                 <td>{{ scdat.user_id.location_id.location_name }}</td>
                                 <td>{{ scdat.user_id.post_id.post_name }}</td>
-                                <td>{{ scdat.user_id }}</td>
+                                <td>{{ scdat.user_id.last_name|add:" "|add:scdat.user_id.first_name }}</td>
                                 <td><pre>{{ scdat.inp_data }}</pre></td>
                                 <td>{{ scdat.updated_at|default_if_none:""|date:"Y/m/d H:i" }}</td>
                             </tr>

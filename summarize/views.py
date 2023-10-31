@@ -36,18 +36,10 @@ def makeSummarizeList(request):
         postid = Post.objects.filter(nendo=nendo, post_code=post)[:1]
         exact_post = Q(user_id__post_id__exact=postid)
 
-    sql = """
-        select sc.nendo, cu.id as user_id,
-            sc.sheet_id, sc.item_id, sc.dsp_no, sc.inp_data, sc.score,
-            sc.created_by, sc.update_by, sc.created_at, sc.updated_at
-        from surveys_score sc
-        left outer join surveys_customuser cu on (sc.nendo = cu.nendo and sc.user_id = cu.user_id)
-    """
-    queryset = Score.objects.raw(sql)
 
-    return (queryset
+    return (Score.objects.select_related()
             .filter(exact_nendo & exact_busyo & exact_location & exact_post & exact_sheet)
-            #.order_by('user_id__busyo_id__bu_code', 'user_id__location_id__location_code', 'user_id__post_id__post_code', 'user_id', 'item_id', 'dsp_no')
+            .order_by('user_id__busyo_id__bu_code', 'user_id__location_id__location_code', 'user_id__post_id__post_code', 'user_id', 'item_id', 'dsp_no')
         )
 
 # 集約一覧
