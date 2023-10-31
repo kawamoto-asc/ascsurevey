@@ -30,7 +30,7 @@ nav {
 /* 一覧のテーブル用 */
 .srv_list th {
     padding: 5px;
-    background-color:whitesmoke
+    background-color:whitesmoke;
 }
 
 .srv_list td {

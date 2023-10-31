@@ -7,7 +7,7 @@ from django.views.generic import ListView
 
 from sheets.models import Items, Sheets
 from summarize.forms import SummarizeQueryForm
-from surveys.models import Ujf, Busyo, Location, Post, Items
+from surveys.models import Ujf, Busyo, Location, Post, Score
 
 # 検索条件(セッション値）から（検索クエリを発行）該当リストを返す
 def makeSummarizeList(request):
@@ -36,15 +36,24 @@ def makeSummarizeList(request):
         postid = Post.objects.filter(nendo=nendo, post_code=post)[:1]
         exact_post = Q(user_id__post_id__exact=postid)
 
-    return (Items.objects.select_related()
+    sql = """
+        select sc.nendo, cu.id as user_id,
+            sc.sheet_id, sc.item_id, sc.dsp_no, sc.inp_data, sc.score,
+            sc.created_by, sc.update_by, sc.created_at, sc.updated_at
+        from surveys_score sc
+        left outer join surveys_customuser cu on (sc.nendo = cu.nendo and sc.user_id = cu.user_id)
+    """
+    queryset = Score.objects.raw(sql)
+
+    return (queryset
             .filter(exact_nendo & exact_busyo & exact_location & exact_post & exact_sheet)
-            .order_by('busyo_id__bu_code', 'location_id__location_code', 'post_id__post_code', 'user_id', 'item_id', 'dsp_no')
+            #.order_by('user_id__busyo_id__bu_code', 'user_id__location_id__location_code', 'user_id__post_id__post_code', 'user_id', 'item_id', 'dsp_no')
         )
 
 # 集約一覧
 class SummarizeListView(LoginRequiredMixin, ListView):
     template_name = 'summarize/summarize_list.html'
-    model = Items
+    #model = Score
 
     # 検索条件をクリアするためのフラグ
     ini_flg = True
@@ -77,9 +86,9 @@ class SummarizeListView(LoginRequiredMixin, ListView):
         context['subtitle'] = MSUM_STR
 
         # 年度リスト作成
-        nendo_items = Items.objects.values_list('nendo')
+        nendo_score = Score.objects.values_list('nendo')
         nendo_ujf = Ujf.objects.filter(key1=1, key2='1').values_list('naiyou4')
-        nendo_list = sorted(nendo_items.union(nendo_ujf), key=lambda obj:obj, reverse=True)  # 降順
+        nendo_list = sorted(nendo_score.union(nendo_ujf), key=lambda obj:obj, reverse=True)  # 降順
         nendolst = []
         for i in range(len(nendo_list)):
             nendolst.append((nendo_list[i][0], nendo_list[i][0]))
@@ -150,4 +159,4 @@ class SummarizeListView(LoginRequiredMixin, ListView):
             return makeSummarizeList(self.request)
         else:
             # 何も返さない
-            return Items.objects.none()
+            return Score.objects.none()

@@ -11,7 +11,7 @@ from django.views.generic import ListView, FormView
 
 from sheets.models import Sheets, Items
 from surveys.forms import Edit2Form
-from surveys.models import Information, Status, Score
+from surveys.models import CustomUser, Information, Status, Score
 
 # トップ画面
 @login_required
@@ -43,15 +43,15 @@ class InputListView(LoginRequiredMixin, ListView):
                 st.created_at, st.updated_at
             from surveys_sheet sh
             left outer join (
-                select nendo, user_id, sheet_id, status, created_at, updated_at
+                select nendo, user_id, login_id, sheet_id, status, created_at, updated_at
                 from surveys_status
-                where user_id = %(userid)s
+                where login_id = %(userid)s
             ) st on (sh.nendo = st.nendo and sh.id = st.sheet_id)
             left outer join (
-                select nendo, user_id, sheet_id, count(*) as itemcount
+                select nendo, user_id, login_id, sheet_id, count(*) as itemcount
                 from surveys_score
-                where user_id = %(userid)s
-                group by nendo, user_id, sheet_id
+                where login_id = %(userid)s
+                group by nendo, user_id, login_id, sheet_id
             ) sc on (st.nendo = sc.nendo and st.user_id = sc.user_id and st.sheet_id = sc.sheet_id)
             where sheet_name = %(shname)s
             order by nendo desc
@@ -133,7 +133,7 @@ class InputEdit2View(LoginRequiredMixin, FormView):
         # なければ 初回表示で、パラメータからformset作成
         else:
             ilst = Score.objects.filter(
-                nendo=self.kwargs['pnendo'], sheet_id=self.kwargs['psheetid'], user_id=self.request.user.username
+                nendo=self.kwargs['pnendo'], sheet_id=self.kwargs['psheetid'], login_id=self.request.user.username
             ).order_by('dsp_no')
             EFORM_NUM = len(ilst)
             initial_data = []
@@ -243,38 +243,44 @@ class InputEdit2View(LoginRequiredMixin, FormView):
         with transaction.atomic():
             nendo = self.kwargs['pnendo']
             sheet_id = self.kwargs['psheetid']
-            user_id = self.request.user.username
+            login_id = self.request.user.username
+            if CustomUser.objects.filter(nendo=nendo, user_id=login_id).exists():
+                user_id = CustomUser.objects.filter(nendo=nendo, user_id=login_id)[0]
+            else:
+                user_id = CustomUser.objects.filter(user_id=login_id).order_by('-nenod')[0]
 
             # 状態管理データの保存
-            if Status.objects.filter(nendo=nendo, user_id=user_id, sheet_id=sheet_id).exists():
+            if Status.objects.filter(nendo=nendo, login_id=login_id, sheet_id=sheet_id).exists():
                 # 更新
-                statusdat = Status.objects.get(nendo=nendo, user_id=user_id, sheet_id=sheet_id)
-                statusdat.update_by = user_id
+                statusdat = Status.objects.get(nendo=nendo, login_id=login_id, sheet_id=sheet_id)
+                statusdat.update_by = login_id
                 statusdat.save()
             else :
                 # 新規作成
                 statusdat = Status()
                 statusdat.nendo = nendo
                 statusdat.user_id = user_id
+                statusdat.login_id = login_id
                 statusdat.sheet_id = Sheets.objects.get(id=sheet_id)
                 statusdat.status = 0
-                statusdat.created_by = user_id
-                statusdat.update_by = user_id
+                statusdat.created_by = login_id
+                statusdat.update_by = login_id
                 statusdat.save()
 
             # 項目データの保存 Delete&Insert
-            if Score.objects.filter(nendo=nendo, user_id=user_id, sheet_id=sheet_id).exists():
-                Score.objects.filter(nendo=nendo, user_id=user_id, sheet_id=sheet_id).delete()
+            if Score.objects.filter(nendo=nendo, login_id=login_id, sheet_id=sheet_id).exists():
+                Score.objects.filter(nendo=nendo, login_id=login_id, sheet_id=sheet_id).delete()
             for i in range(EFORM_NUM):
                 scoredat = Score()
                 scoredat.nendo = nendo
                 scoredat.user_id = user_id
+                scoredat.login_id = login_id
                 scoredat.sheet_id = Sheets.objects.get(id=sheet_id)
                 scoredat.item_id = Items.objects.filter(nendo=nendo, sheet_id=sheet_id)[0]
                 scoredat.dsp_no = i + 1
                 scoredat.inp_data = EFORM_VALUES['form-' + str(i) + '-content']
-                scoredat.created_by = user_id
-                scoredat.update_by = user_id
+                scoredat.created_by = login_id
+                scoredat.update_by = login_id
                 scoredat.save()
 
         

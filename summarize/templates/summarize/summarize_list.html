@@ -27,6 +27,69 @@
                 </tr>
             </table>
         </form>
-    </div>
+
+        <section class="post-list">
+            {% if not ini_flg %}
+                <div class="mb-1">
+                    <a class="btn btn-success opacity-75" href="{% url 'cuser-download' %}">Excel出力</a>
+                </div>
+                {% if object_list|length == 0 %}
+                    <p>検索結果が存在しません。</p>
+                {% else %}
+                <div class="table-responsive" id="result-div">
+                    <table class="table table-bordered">
+                        <thead class="sticky-top table-light">
+                            <tr>
+                                <th>年度</th>
+                                <th>部署名</th>
+                                <th>勤務地</th>
+                                <th>役職</th>
+                                <th>氏 名</th>
+                                <th>内容</th>
+                                <!--一問他答形式はDeleteInsertだから更新日だけ表示-->
+                                <th>更新日</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for scdat in object_list %}
+                            <tr>
+                                <td>{{ scdat.nendo }}</td>
+                                <td>{{ scdat.user_id.busyo_id.bu_name }}</td>
+                                <td>{{ scdat.user_id.location_id.location_name }}</td>
+                                <td>{{ scdat.user_id.post_id.post_name }}</td>
+                                <td>{{ scdat.user_id }}</td>
+                                <td><pre>{{ scdat.inp_data }}</pre></td>
+                                <td>{{ scdat.updated_at|default_if_none:""|date:"Y/m/d H:i" }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        {% endif %}
+    </section>
+</div>
+
+<script>
+    let p = document.querySelector('#id_nendo');
+
+    p.onchange = function() {
+        let pnendo = p.selectedOptions[0].value;
+        // リストの更新関数はユーザマスタメンテナンスのものを使う
+        // 部署リスト更新
+        renewSelectList(pnendo, '/customusers/get-busyolist', '#id_busyo');
+        // 勤務地リスト更新
+        renewSelectList(pnendo, '/customusers/get-locationlist', '#id_location');
+        // 役職リスト更新
+        renewSelectList(pnendo, '/customusers/get-postlist', '#id_post');
+    }
+
+    // テーブルのヘッダ固定用divの高さ設定
+    let pdiv = document.querySelector('#result-div');
+    if(pdiv) {
+        let ht = document.documentElement.clientHeight - 250;
+        pdiv.style.height = ht;
+    }
+</script>
 
 {% endblock %}

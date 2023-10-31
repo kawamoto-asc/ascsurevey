@@ -163,7 +163,8 @@ class CustomUser(models.Model):
 # 状態管理データ
 class Status(models.Model):
     nendo = models.IntegerField('年度')
-    user_id = models.CharField('ユーザーID', max_length=128)
+    user_id = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING, db_column='user_id')
+    login_id = models.CharField('ログインユーザID', max_length=128, null=True)
     sheet_id = models.ForeignKey(Sheets, on_delete=models.DO_NOTHING, db_column='sheet_id')
     status = models.IntegerField ('ステータス', blank=True, null=True)
     score = models.FloatField('得点', blank=True, null=True)
@@ -191,7 +192,8 @@ class Status(models.Model):
 # 項目データ
 class Score(models.Model):
     nendo = models.IntegerField('年度')
-    user_id = models.CharField('ユーザーID', max_length=128)
+    user_id = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING, db_column='user_id')
+    login_id = models.CharField('ログインユーザーID', max_length=128, null=True)
     sheet_id = models.ForeignKey(Sheets, on_delete=models.DO_NOTHING, db_column='sheet_id')
     item_id = models.ForeignKey(Items, on_delete=models.DO_NOTHING, db_column='item_id')
     dsp_no = models.IntegerField('表示順')
