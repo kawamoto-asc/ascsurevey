@@ -1,13 +1,16 @@
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
-from django.http import HttpResponse, JsonResponse
-from sheets.consts import MSUM_STR
-from django.shortcuts import render
+from django.http import HttpResponse
 from django.views.generic import ListView
 
-from sheets.models import Items, Sheets
+from sheets.consts import MSUM_STR
+from sheets.models import Sheets
 from summarize.forms import SummarizeQueryForm
 from surveys.models import Ujf, Busyo, Location, Post, Score
+
+from pytz import timezone
+import openpyxl
 
 # 検索条件(セッション値）から（検索クエリを発行）該当リストを返す
 def makeSummarizeList(request):
@@ -45,7 +48,7 @@ def makeSummarizeList(request):
 # 集約一覧
 class SummarizeListView(LoginRequiredMixin, ListView):
     template_name = 'summarize/summarize_list.html'
-    #model = Score
+    model = Score
 
     # 検索条件をクリアするためのフラグ
     ini_flg = True
@@ -152,3 +155,45 @@ class SummarizeListView(LoginRequiredMixin, ListView):
         else:
             # 何も返さない
             return Score.objects.none()
+
+# Excelダウンロード
+def dl_score_excel2(request):
+    wb = openpyxl.load_workbook(str(settings.BASE_DIR) + '/media/summarize2.xlsx')
+    ws = wb.active
+
+    # データ出力開始行
+    row = 4
+    # 列数
+    col_max = 7
+
+    # スタイルを取得
+    cellstylelist = []
+    for i in range(col_max):
+        cellstyle = ws.cell(row, (i+1))._style
+        cellstylelist.append(cellstyle)
+
+    sclist = makeSummarizeList(request)
+
+    # タイトルを出力
+    ws.cell(1, 1).value = sclist[0].sheet_id.title
+
+    for scdat in sclist:
+        # 値を設定
+        ws.cell(row, 1).value = scdat.nendo
+        ws.cell(row, 2).value = scdat.user_id.busyo_id.bu_name
+        ws.cell(row, 3).value = scdat.user_id.location_id.location_name
+        ws.cell(row, 4).value = scdat.user_id.post_id.post_name
+        ws.cell(row, 5).value = scdat.user_id.last_name + ' ' + scdat.user_id.first_name
+        ws.cell(row, 6).value = scdat.inp_data
+        ws.cell(row, 7).value = scdat.updated_at.astimezone(timezone('Asia/Tokyo')).strftime('%Y/%m/%d %H:%M:%S')
+        # スタイルを設定
+        for i in range(col_max):
+            ws.cell(row, (i+1))._style = cellstylelist[i]
+        row += 1
+        
+    # ダウンロード
+    response = HttpResponse(content_type='application/vnd.ms-excel')
+    response['Content-Disposition'] = 'attachment; filename=%s' % 'summarize.xlsx'
+    wb.save(response)
+
+    return response

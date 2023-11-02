@@ -31,8 +31,14 @@
         <section class="post-list">
             {% if not ini_flg %}
                 <div class="mb-1">
-                    <a class="btn btn-success opacity-75" href="{% url 'cuser-download' %}">Excel出力</a>
-                </div>
+                    <!--一問一答採点形式なら-->
+                    {% if qsheet.input_type == 1 %}
+                        <a class="btn btn-success opacity-75" href="#">Excel出力</a>
+                    <!--一問多答形式なら-->
+                    {% elif qsheet.input_type == 2 %}
+                        <a class="btn btn-success opacity-75" href="{% url 'score-download2' %}">Excel出力</a>
+                    {% endif %}
+                    </div>
                 {% if object_list|length == 0 %}
                     <p>検索結果が存在しません。</p>
                 {% else %}
