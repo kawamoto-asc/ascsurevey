@@ -28,14 +28,29 @@ nav {
 }
 
 /* 一覧のテーブル用 */
+/* sticy-topでヘッダー固定するとヘッダの罫線が消える対策 */
+table.srv_list {
+    border-collspace: separate;
+}
+
+table.srv_list .fixcell:first-child {
+	left: 0;
+}
+
+/* 幅をbootstrapのtableで自動調整したくない用に作成 */
 .srv_list th {
     padding: 5px;
     background-color:whitesmoke;
+    /* ヘッダに縦罫線付けても sticy-topでスクロールしたら罫線表示されなくなるのでthは指定しない
+    border-left: solid 2px whitesmoke;
+    border-right: solid 2px whitesmoke; */
 }
 
 .srv_list td {
-  padding-left: 5px;
-  padding-right: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-left: solid 2px whitesmoke;
+    border-right: solid 2px whitesmoke;
 }
 
 /* formsetのエラー表示用 */
