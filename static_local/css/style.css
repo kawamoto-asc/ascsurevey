@@ -30,6 +30,8 @@ nav {
 /* 一覧のテーブル用 */
 /* sticy-topでヘッダー固定するとヘッダの罫線が消える対策 */
 table.srv_list {
+    position: relative;
+    z-index:1;
     border-collspace: separate;
 }
 
