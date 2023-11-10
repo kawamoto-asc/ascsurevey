@@ -1050,7 +1050,7 @@ class SheetFileUploadView(LoginRequiredMixin, FormView):
                     amenudat = Menu()
                     amenudat.url = sumurl
                     amenudat.created_by = self.request.user.username
-                amenudat.title = chk_aname + MSUM_STR
+                amenudat.title = chk_aname + ' ' + MSUM_STR
                 amenudat.kbn = 2
                 amenudat.dsp_no = chk_dspno
                 amenudat.req_staff = reg_staff
