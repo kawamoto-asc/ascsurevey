@@ -53,7 +53,8 @@ class InputListView(LoginRequiredMixin, ListView):
                 where login_id = %(userid)s
                 group by nendo, user_id, login_id, sheet_id
             ) sc on (st.nendo = sc.nendo and st.user_id = sc.user_id and st.sheet_id = sc.sheet_id)
-            where sheet_name = %(shname)s
+            left outer join surveys_customuser u1 on (sh.nendo = u1.nendo and u1.user_id = %(userid)s)
+            where sheet_name = %(shname)s and u1.user_id is not null
             order by nendo desc
         """
         params = {"shname": sheet_name, "userid": self.request.user.username}
