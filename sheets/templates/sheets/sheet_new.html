@@ -34,4 +34,17 @@
             {% include './sheet_detail2.html' %}
         </form>
     </div>
-{% endblock %}
+
+    <script>
+        let p = document.querySelector('#id_nendo');
+    
+        p.onchange = function() {
+            let pnendo = p.value;
+            // リストの更新関数はユーザマスタメンテナンスのものを使う
+            // 部署リスト更新
+            renewSelectList(pnendo, '/customusers/get-busyolist', '#id_busyo');
+        }
+    
+    </script>
+
+    {% endblock %}

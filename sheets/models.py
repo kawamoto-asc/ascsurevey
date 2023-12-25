@@ -11,6 +11,7 @@ class Sheets(models.Model):
     input_type = models.IntegerField ('入力形式', choices=INPUT_TYPE_CHOICES)
     aggre_type = models.IntegerField ('集計タイプ', choices=AGGRE_TYPE_CHOICES)
     req_staff = models.BooleanField('集計画面スタッフ権限要否')
+    busyo_id = models.ForeignKey('surveys.Busyo', on_delete=models.DO_NOTHING, db_column='busyo_id', blank=True, null=True)
     remarks1 = models.TextField('備考1', max_length=512, blank=True, null=True)
     remarks2 = models.TextField('備考2', max_length=256, blank=True, null=True)
 
