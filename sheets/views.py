@@ -10,7 +10,7 @@ from django.views.generic import ListView, FormView
 from sheets.consts import INPUT_TYPE_CHOICES, FIELD_TYPE_CHOICES, AGGRE_TYPE_CHOICES, INPUT_URL, SUM_URL, MSUM_STR
 from sheets.models import Sheets, Items
 from sheets.forms import SheetQueryForm, SheetForm, ItemForm, FileUploadForm
-from surveys.models import Ujf, Menu
+from surveys.models import Ujf, Menu, Busyo
 from pytz import timezone
 import openpyxl
 import pandas as pd
@@ -174,6 +174,10 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
                     'formset': self.form_class2(FORM_VALUES),
                     })
             else:
+                # 部署リスト作成
+                nendo = self.kwargs['pnendo']
+                blist = [('', '')] + list(Busyo.objects.filter(nendo=nendo).values_list('bu_code', 'bu_name').order_by('bu_code'))
+                context['form'].fields['busyo'].choices = blist
                 context.update({
                     'formset': self.form_class2(FORM_VALUES),
                     })
@@ -291,6 +295,10 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
         if frmdic['input_type'] == '2' and FORM_NUM > 1:
             form.add_error(None, '一問多答形式で登録出来る項目数は１件のみです。')
 
+        # チャレンジ評価形式で部署がえらばれていなければエラー
+        if frmdic['input_type'] == '3' and not frmdic['busyo']:
+            form.add_error(None, 'チャレンジ評価(部署別)形式は部署を選択してください。')
+
         # 項目リスト部分のエラーチェック
         if FORM_NUM <= 0:
             form.add_error(None, 'アンケート項目がありません。')
@@ -316,9 +324,12 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
     # データ保存処理
     def dataEntry(self, frmdic):
         with transaction.atomic():
+            nendo = frmdic['nendo']
+            bu_code = frmdic['busyo']
+
             # シート情報を保存
             sheetdat = Sheets()
-            sheetdat.nendo = frmdic['nendo']
+            sheetdat.nendo = nendo
             sheetdat.sheet_name = frmdic['sheet_name']
             sheetdat.title = frmdic['title']
             # 表示順
@@ -335,6 +346,8 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
             sheetdat.dsp_no = dno
             sheetdat.input_type = frmdic['input_type']
             sheetdat.aggre_type = frmdic['aggre_type']
+            if frmdic['busyo']:
+                sheetdat.busyo_id = Busyo.objects.get(nendo=nendo, bu_code=bu_code)
             sheetdat.remarks1 = frmdic['remarks1']
             sheetdat.remarks2 = frmdic['remarks2']
             rstaff = False
@@ -346,7 +359,6 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
             sheetdat.save()
 
             # 項目情報保存
-            nendo = frmdic['nendo']
             sheetid = Sheets.objects.get(nendo=nendo, sheet_name=frmdic['sheet_name'])
             for i in range(FORM_NUM):
                 itemdat = Items()
@@ -374,6 +386,8 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
                 imenudat.title = frmdic['title']
                 imenudat.url = inpurl
                 imenudat.kbn = 1
+                if frmdic['input_type'] == '3' and frmdic['busyo']:
+                    imenudat.busyo_id = Busyo.objects.get(nendo=nendo, bu_code=bu_code)
                 imenudat.dsp_no = dno
                 imenudat.req_staff = False
                 imenudat.created_by = self.request.user.username
@@ -465,6 +479,10 @@ class SheetsEditView(LoginRequiredMixin, FormView):
                     'formset': self.form_class2(FORM_VALUES),
                     })
             else:
+                # 部署リスト作成
+                nendo = self.kwargs['pnendo']
+                blist = [('', '')] + list(Busyo.objects.filter(nendo=nendo).values_list('bu_code', 'bu_name').order_by('bu_code'))
+                context['form'].fields['busyo'].choices = blist
                 context.update({
                     'formset': self.form_class2(FORM_VALUES),
                     })
@@ -581,6 +599,10 @@ class SheetsEditView(LoginRequiredMixin, FormView):
         if frmdic['input_type'] == '2' and FORM_NUM > 1:
             form.add_error(None, '一問多答形式で登録出来る項目数は１件のみです。')
 
+        # チャレンジ評価形式で部署がえらばれていなければエラー
+        if frmdic['input_type'] == '3' and not frmdic['busyo']:
+            form.add_error(None, 'チャレンジ評価(部署別)形式は部署を選択してください。')
+
         # 項目リスト部分のエラーチェック
         if FORM_NUM <= 0:
             form.add_error(None, 'アンケート項目がありません。')
@@ -610,6 +632,7 @@ class SheetsEditView(LoginRequiredMixin, FormView):
             with transaction.atomic():
                 nendo = self.kwargs['pnendo']
                 sheet_id=self.kwargs['id']
+                bu_code = frmdic['busyo']
 
                 # シート情報を保存
                 sheetdat = Sheets.objects.get(nendo=nendo, id=sheet_id)
@@ -627,6 +650,10 @@ class SheetsEditView(LoginRequiredMixin, FormView):
                 sheetdat.dsp_no = dno
                 sheetdat.input_type = frmdic['input_type']
                 sheetdat.aggre_type = frmdic['aggre_type']
+                if frmdic['busyo']:
+                    sheetdat.busyo_id = Busyo.objects.get(nendo=nendo, bu_code=bu_code)
+                else:
+                    sheetdat.busyo_id = None
                 sheetdat.remarks1 = frmdic['remarks1']
                 sheetdat.remarks2 = frmdic['remarks2']
                 rstaff = False
@@ -677,6 +704,10 @@ class SheetsEditView(LoginRequiredMixin, FormView):
                     imenudat = Menu.objects.get(url=inpurl)
                     imenudat.title = frmdic['title']
                     imenudat.kbn = 1
+                    if frmdic['input_type'] == '3' and frmdic['busyo']:
+                        imenudat.busyo_id = Busyo.objects.get(nendo=nendo, bu_code=bu_code)
+                    else:
+                        imenudat.busyo_id = None
                     imenudat.dsp_no = dno
                     imenudat.req_staff = False
                     imenudat.update_by = self.request.user.username
@@ -720,7 +751,7 @@ def SheetsDownloadExcel(request, pnendo, id):
     # データ出力開始行
     row = 2
     # 列数
-    col_max = 21
+    col_max = 23
 
     # スタイルを取得
     cellstylelist = []
@@ -744,28 +775,56 @@ def SheetsDownloadExcel(request, pnendo, id):
 
     for idat in itemlist:
         # 値を設定
-        ws.cell(row, 1).value = sheet.nendo
-        ws.cell(row, 2).value = sheet.sheet_name
-        ws.cell(row, 3).value = sheet.title
-        ws.cell(row, 4).value = sheet.dsp_no
-        ws.cell(row, 5).value = sheet.input_type
-        ws.cell(row, 6).value = ityp_dic[sheet.input_type]
-        ws.cell(row, 7).value = sheet.aggre_type
-        ws.cell(row, 8).value = atyp_dic[sheet.aggre_type]
-        ws.cell(row, 9).value = sheet.req_staff
-        ws.cell(row, 10).value = sheet.remarks1
-        ws.cell(row, 11).value = sheet.remarks2
-        ws.cell(row, 12).value = idat.item_no
-        ws.cell(row, 13).value = idat.content
-        ws.cell(row, 14).value = idat.input_type
-        ws.cell(row, 15).value = ftyp_dic[idat.input_type]
-        ws.cell(row, 16).value = idat.answer
-        ws.cell(row, 17).value = idat.haiten
+        i = 1
+        ws.cell(row, i).value = sheet.nendo
+        i+=1
+        ws.cell(row, i).value = sheet.sheet_name
+        i+=1
+        ws.cell(row, i).value = sheet.title
+        i+=1
+        ws.cell(row, i).value = sheet.dsp_no
+        i+=1
+        ws.cell(row, i).value = sheet.input_type
+        i+=1
+        ws.cell(row, i).value = ityp_dic[sheet.input_type]
+        i+=1
+        ws.cell(row, i).value = sheet.aggre_type
+        i+=1
+        ws.cell(row, i).value = atyp_dic[sheet.aggre_type]
+        i+=1
+        ws.cell(row, i).value = sheet.req_staff
+        i+=1
+        if sheet.busyo_id:
+            ws.cell(row, i).value = sheet.busyo_id.bu_code
+            i+=1
+            ws.cell(row, i).value = sheet.busyo_id.bu_name
+            i+=1
+        else:
+            i += 2
+        ws.cell(row, i).value = sheet.remarks1
+        i+=1
+        ws.cell(row, i).value = sheet.remarks2
+        i+=1
+        ws.cell(row, i).value = idat.item_no
+        i+=1
+        ws.cell(row, i).value = idat.content
+        i+=1
+        ws.cell(row, i).value = idat.input_type
+        i+=1
+        ws.cell(row, i).value = ftyp_dic[idat.input_type]
+        i+=1
+        ws.cell(row, i).value = idat.answer
+        i+=1
+        ws.cell(row, i).value = idat.haiten
         # 作成・更新情報はシートのものを出力（項目はDeleteInsertだから作成情報＝更新情報になってしまうから）
-        ws.cell(row, 18).value = sheet.created_by
-        ws.cell(row, 19).value = sheet.created_at.astimezone(timezone('Asia/Tokyo')).strftime('%Y/%m/%d %H:%M:%S')
-        ws.cell(row, 20).value = sheet.update_by
-        ws.cell(row, 21).value = sheet.updated_at.astimezone(timezone('Asia/Tokyo')).strftime('%Y/%m/%d %H:%M:%S')
+        i+=1
+        ws.cell(row, i).value = sheet.created_by
+        i+=1
+        ws.cell(row, i).value = sheet.created_at.astimezone(timezone('Asia/Tokyo')).strftime('%Y/%m/%d %H:%M:%S')
+        i+=1
+        ws.cell(row, i).value = sheet.update_by
+        i+=1
+        ws.cell(row, i).value = sheet.updated_at.astimezone(timezone('Asia/Tokyo')).strftime('%Y/%m/%d %H:%M:%S')
         # スタイルを設定
         for i in range(col_max):
             ws.cell(row, (i+1))._style = cellstylelist[i]
@@ -810,6 +869,7 @@ class SheetFileUploadView(LoginRequiredMixin, FormView):
         chk_atype = None
         chk_dspno = None
         chk_staff = None
+        chk_busyo = None
         chk_rmks1 = None
         chk_rmks2 = None
         # 登録済みチェック用
@@ -894,6 +954,9 @@ class SheetFileUploadView(LoginRequiredMixin, FormView):
                         # 比較用入力形式と違う値が入っていればエラー
                         if chk_itype != str_itype:
                             form.add_error(None, '異なる入力形式が入力されています。(%s行目)' % str((i+2)))
+                        else:
+                            if chk_itype == '3' and str(ldat['部署']) == 'nan':
+                                form.add_error(None, '部署コードの入力がありません。(%s行目)' % str((i+2)))
                         
             # 集計タイプチェック
             str_atype = str(ldat['集計タイプ'])
@@ -925,6 +988,20 @@ class SheetFileUploadView(LoginRequiredMixin, FormView):
                     # 比較用集計画面管理者権限要と違う値が入っていればエラー
                     if chk_staff != strstaff:
                         form.add_error(None, '異なる集計画面管理者権限要の値が入力されています。(%s行目)' % str((i+2)))
+
+            # 部署チェック
+            strbusyo = str(ldat['部署'])
+            if strbusyo != 'nan':
+                if reg.match(strbusyo) is None:
+                    form.add_error(None, '部署に数字以外の文字の入力があります。(%s行目)' % str((i+2)))
+                else:
+                    # 比較用年度に値がなければセット
+                    if not chk_busyo:
+                        chk_busyo = int(strbusyo)
+                    else:
+                        # 比較用年度と違う値が入っていればエラー
+                        if chk_busyo != int(strbusyo):
+                            form.add_error(None, '異なる部署の値が入力されています。(%s行目)' % str((i+2)))
 
             # 備考1 備考はノーチェックで一番最後に入った値を登録するようにする
             str_rmks1 = str(ldat['備考1'])
@@ -1014,6 +1091,10 @@ class SheetFileUploadView(LoginRequiredMixin, FormView):
                 sheetdat.input_type = chk_itype
                 sheetdat.aggre_type = chk_atype
                 sheetdat.req_staff = reg_staff
+                if chk_itype == '3':
+                    sheetdat.busyo_id = Busyo.objects.get(nendo=chk_nendo, bu_code=chk_busyo)
+                else:
+                    sheetdat.busyo_id = None
                 sheetdat.remarks1 = chk_rmks1
                 sheetdat.remarks2 = chk_rmks2
                 sheetdat.save()
@@ -1037,6 +1118,10 @@ class SheetFileUploadView(LoginRequiredMixin, FormView):
                 imenudat.kbn = 1
                 imenudat.dsp_no = chk_dspno
                 imenudat.req_staff = False
+                if chk_itype == '3':
+                    imenudat.busyo_id = Busyo.objects.get(nendo=chk_nendo, bu_code=chk_busyo)
+                else:
+                    imenudat.busyo_id = None
                 imenudat.save()
 
                 # 集約画面のURL

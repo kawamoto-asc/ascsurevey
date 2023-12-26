@@ -67,7 +67,8 @@ class SheetForm(forms.Form):
             self.fields['input_type'].initial = sobj.input_type
             self.fields['aggre_type'].initial = sobj.aggre_type
             self.fields['req_staff'].initial = sobj.req_staff
-            self.fields['busyo'].initial = sobj.busyo_id
+            if sobj.busyo_id:
+                self.fields['busyo'].initial = sobj.busyo_id.bu_code
             self.fields['remarks1'].initial = sobj.remarks1
             self.fields['remarks2'].initial = sobj.remarks2
            

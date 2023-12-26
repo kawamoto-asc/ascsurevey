@@ -9,7 +9,7 @@ INPUT_TYPE_CHOICES = (
 FIELD_TYPE_CHOICES = (
     ('SELECT_CHOICES01', '〇×入力形式'),
     ('SELECT_CHOICES02', '5段階入力形式(S-C,未提出)'),
-    ('SELECT_CHOICES03', 'メンバー選択形式'),
+    ('SELECT_CHOICES03', '順位選択形式(1-5位)'),
     ('textarea', 'textarea'),
 )
 
@@ -40,4 +40,12 @@ SELECT_CHOICES02 = (
     ('B', 'B'),
     ('C', 'C'),
     ('未提出', '未提出'),
+)
+
+SELECT_CHOICES03 = (
+    ('1', '1位'),
+    ('2', '2位'),
+    ('3', '3位'),
+    ('4', '4位'),
+    ('5', '5位'),
 )
