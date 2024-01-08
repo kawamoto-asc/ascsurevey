@@ -25,7 +25,7 @@ class Menu(models.Model):
     kbn = models.IntegerField ('区分', choices=MENU_KBN_CHOICES)
     dsp_no = models.IntegerField ('表示順')
     req_staff = models.BooleanField('スタッフ権限要否')
-    busyo_id = models.ForeignKey('surveys.Busyo', on_delete=models.DO_NOTHING, db_column='busyo_id', blank=True, null=True)
+    bu_code = models.IntegerField('部署コード', blank=True, null=True)
 
     created_by = models.CharField('作成者', max_length=128, blank=True, null=True)
     update_by = models.CharField('更新者', max_length=128, blank=True, null=True)

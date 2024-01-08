@@ -387,7 +387,7 @@ class SheetsCreateView(LoginRequiredMixin, FormView):
                 imenudat.url = inpurl
                 imenudat.kbn = 1
                 if frmdic['input_type'] == '3' and frmdic['busyo']:
-                    imenudat.busyo_id = Busyo.objects.get(nendo=nendo, bu_code=bu_code)
+                    imenudat.bu_code = bu_code
                 imenudat.dsp_no = dno
                 imenudat.req_staff = False
                 imenudat.created_by = self.request.user.username
@@ -705,9 +705,9 @@ class SheetsEditView(LoginRequiredMixin, FormView):
                     imenudat.title = frmdic['title']
                     imenudat.kbn = 1
                     if frmdic['input_type'] == '3' and frmdic['busyo']:
-                        imenudat.busyo_id = Busyo.objects.get(nendo=nendo, bu_code=bu_code)
+                        imenudat.bu_code = bu_code
                     else:
-                        imenudat.busyo_id = None
+                        imenudat.bu_code = None
                     imenudat.dsp_no = dno
                     imenudat.req_staff = False
                     imenudat.update_by = self.request.user.username
@@ -1119,9 +1119,9 @@ class SheetFileUploadView(LoginRequiredMixin, FormView):
                 imenudat.dsp_no = chk_dspno
                 imenudat.req_staff = False
                 if chk_itype == '3':
-                    imenudat.busyo_id = Busyo.objects.get(nendo=chk_nendo, bu_code=chk_busyo)
+                    imenudat.bu_code = chk_busyo
                 else:
-                    imenudat.busyo_id = None
+                    imenudat.bu_code = None
                 imenudat.save()
 
                 # 集約画面のURL

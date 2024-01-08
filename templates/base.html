@@ -1,5 +1,6 @@
 {% load static %}
 {% load django_bootstrap5 %}
+{% load utility %}
 <html>
 <head>
     <meta charset="utf-8">
@@ -34,6 +35,7 @@
     </header>
     <div class="d-flex flex-row" style="height: calc(100% - 30px)">
         <div class="w-100">
+            <div style="display:none;">部署コード：{{ request|get_BuCode:ujf_nendo }}</div>
             <div class="border shadow-sm d-flex flex-row bg-primary bg-opacity-75 justify-content-between">
                 <div class="d-flex flex-row align-items-center">
                     <!-- HOME -->
@@ -47,7 +49,9 @@
                         </button>
                         <ul class="dropdown-menu bg-primary" aria-labelledby="dropdownMenuButton">
                             {% for imenu_dat in imenu %}
-                            <li class="nav-item"><a href="{{ imenu_dat.url }}" class="nav-link">{{ imenu_dat.title }}</a></li>
+                                {% if not imenu_dat.bu_code or imenu_dat.bu_code == request.session.sbu_code %}
+                                    <li class="nav-item"><a href="{{ imenu_dat.url }}" class="nav-link">{{ imenu_dat.title }}</a></li>
+                                {% endif %}
                             {% endfor %}
                         </ul>
                     </div>

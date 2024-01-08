@@ -73,6 +73,9 @@ TEMPLATES = [
                 'surveys.context_processors.global_menu_data',
                 'surveys.context_processors.global_ujf',
             ],
+            'libraries': {
+                'utility': 'surveys.templatetags.utility'
+            }
         },
     },
 ]
